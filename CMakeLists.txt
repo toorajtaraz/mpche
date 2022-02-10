@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 set(OpenCV_DIR "${CMAKE_CURRENT_SOURCE_DIR}/submodules/opencv/build/")
 find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
