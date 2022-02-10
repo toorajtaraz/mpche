@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.10)
+set(OpenCV_DIR "${CMAKE_CURRENT_SOURCE_DIR}/submodules/opencv/build/")
+find_package( OpenCV REQUIRED )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+
+PROJECT (mpche)
+set( NAME_SRC
+  mpche.cpp
+  utils/ocv_wrappers.cpp
+)
+
+set( NAME_HEADERS
+  headers/ocv_wrappers.h
+)
+
+INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/headers )
+link_directories( ${CMAKE_BINARY_DIR}/bin)
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+add_executable( mpche ${NAME_SRC} ${NAME_HEADERS} )
+
+target_link_libraries( mpche ${OpenCV_LIBS} )
