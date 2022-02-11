@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.10)
 PROJECT (mpche LANGUAGES CXX)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 set(OpenCV_DIR "${CMAKE_CURRENT_SOURCE_DIR}/submodules/opencv/build/")
 find_package( OpenCV REQUIRED )
 find_package(OpenMP REQUIRED)
 include_directories( ${OpenCV_INCLUDE_DIRS} )
+include_directories( ${OpenMP_CXX_INCLUDE_DIRS} )
+include_directories( ${OpenMP_C_INCLUDE_DIRS} )
 
 set( NAME_SRC
   mpche.cpp
