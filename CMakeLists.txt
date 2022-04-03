@@ -10,10 +10,12 @@ include_directories( ${OpenMP_C_INCLUDE_DIRS} )
 set( NAME_SRC
   mpche.cpp
   utils/ocv_wrappers.cpp
+  utils/SerialLHE.cpp
 )
 
 set( NAME_HEADERS
   headers/ocv_wrappers.h
+  headers/SerialLHE.h
 )
 
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/headers )

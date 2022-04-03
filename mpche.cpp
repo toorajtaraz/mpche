@@ -1,6 +1,7 @@
 #include <iostream>
 #include <omp.h>
 #include <opencv2/opencv.hpp>
+#include "headers/SerialLHE.h"
 using namespace cv;
 int main(int argc, char** argv ) {
     #pragma omp parallel
@@ -9,6 +10,12 @@ int main(int argc, char** argv ) {
             omp_get_thread_num());
     }
     std::cout << "Hello, World from non parallel part!\n";
+    /*PAIR SESS START*/
+    SerialLHE slhe;
+    Mat img = imread("/home/toorajtaraz/Documents/university/MP/projects/phase1/mpche/images/he2.jpg", 0);
+    slhe.Test(img);
+    /*PAIR SESS END*/
+
     /*TOORAJ BEGIN*/
 
     /*TOORAJ END*/
@@ -18,7 +25,7 @@ int main(int argc, char** argv ) {
     /*ALI END*/
 
     /*PARIYA BEGIN*/
-
+    
     /*PARIYA END*/
     waitKey(0);
     return 0;
