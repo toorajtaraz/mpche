@@ -8,6 +8,7 @@ class SerialLHE {
         int* BuildLookUpTable(double* prob);
     public:
         void Test(cv::Mat img);
+        void ApplyLHEWithInterpol(cv::Mat& base, cv::Mat img, int window);
         void ApplyLHE(cv::Mat& base, cv::Mat img, int window);
 };
 

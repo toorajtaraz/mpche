@@ -53,9 +53,12 @@ void SerialLHE::Test(cv::Mat img) {
     }
     //create empty base
     cv::Mat base(img.size(), CV_8UC1, cv::Scalar(0));
-    this->ApplyLHE(base, img, 151);
+    this->ApplyLHEWithInterpol(base, img, 151);
 }
-void SerialLHE::ApplyLHE(cv::Mat& base, cv::Mat img, int window) {
+
+void SerialLHE::ApplyLHE(cv::Mat& base, cv::Mat img, int window) {}
+
+void SerialLHE::ApplyLHEWithInterpol(cv::Mat& base, cv::Mat img, int window) {
     std::map<std::tuple<int, int>, int*> all_luts;
     int offset = (int) floor(window / 2.0);
     int height = img.size().height;
@@ -103,8 +106,7 @@ void SerialLHE::ApplyLHE(cv::Mat& base, cv::Mat img, int window) {
                                 lower_right_lut[img.at<uchar>(i, j)] * x1_weight * y1_weight);
         }
     }
-    cv::imshow("LHE", base);
-    cv::waitKey(0);
+
     //Cleaning all_luts
     for (auto it = all_luts.begin(); it != all_luts.end(); it++) {
         delete[] it->second;
