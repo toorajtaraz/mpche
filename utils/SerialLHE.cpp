@@ -13,7 +13,9 @@ int *SerialLHE::ExtractHistogram(cv::Mat img, int *count, int x_start, int x_end
     if (histt == NULL)
     {
         histt = new int[PIXEL_RANGE]();
-    } else {
+    }
+    else
+    {
         if (x_start < 0 || x_end > img.size().height || y_start < 0 || y_end > img.size().width)
         {
             return NULL;
@@ -80,9 +82,10 @@ void SerialLHE::Test(cv::Mat img)
     //  cv::waitKey(0);
 
     cv::Mat out(img.size().height * 0.35, img.size().width * 0.35, CV_8UC1, cv::Scalar(0));
-    cv::resize(img, out, cv::Size(), 0.35, 0.35);
+    cv::resize(img, out, cv::Size(), 1, 1);
     cv::Mat base(out.size(), CV_8UC1, cv::Scalar(0));
-    this->ApplyLHE(base, out, 15);
+    this->ApplyLHE(base, out, 251);
+    cv::imwrite("base.jpg", base);
 }
 
 void SerialLHE::ApplyLHE(cv::Mat &base, cv::Mat img, int window)

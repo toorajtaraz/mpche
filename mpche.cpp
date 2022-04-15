@@ -3,16 +3,17 @@
 #include <opencv2/opencv.hpp>
 #include "headers/SerialLHE.h"
 using namespace cv;
-int main(int argc, char** argv ) {
-    #pragma omp parallel
+int main(int argc, char **argv)
+{
+#pragma omp parallel
     {
         printf("Hello World... from thread = %d\n",
-            omp_get_thread_num());
+               omp_get_thread_num());
     }
     std::cout << "Hello, World from non parallel part!\n";
     /*PAIR SESS START*/
     SerialLHE slhe;
-    Mat img = imread("/home/toorajtaraz/Documents/university/MP/projects/phase1/mpche/images/he2.jpg", 0);
+    Mat img = imread("/home/mpche/images/he1.jpg", 0);
     slhe.Test(img);
     /*PAIR SESS END*/
 
@@ -25,7 +26,7 @@ int main(int argc, char** argv ) {
     /*ALI END*/
 
     /*PARIYA BEGIN*/
-    
+
     /*PARIYA END*/
     waitKey(0);
     return 0;

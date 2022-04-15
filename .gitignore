@@ -42,3 +42,4 @@ Release/
 .cache
 .vscode
 images
+.idea/
