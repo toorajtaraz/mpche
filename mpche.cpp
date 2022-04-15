@@ -13,7 +13,7 @@ int main(int argc, char **argv)
     std::cout << "Hello, World from non parallel part!\n";
     /*PAIR SESS START*/
     SerialLHE slhe;
-    Mat img = imread("/home/mpche/images/he1.jpg", 0);
+    Mat img = imread("/home/toorajtaraz/Documents/university/MP/projects/phase1/mpche/images/he4.jpg");
     slhe.Test(img);
     /*PAIR SESS END*/
 

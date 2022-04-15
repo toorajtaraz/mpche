@@ -94,7 +94,7 @@ double *SerialLHE::BuildLookUpTable(double *prob)
     return lut;
 }
 
-int *SerialLHE::BuildLookUpTableRGB(int *hist_blue, int *hist_green, int *hist_red, int count)
+double *SerialLHE::BuildLookUpTableRGB(int *hist_blue, int *hist_green, int *hist_red, int count)
 {
     // int count_blue = 0;
     // int *hist_blue = ExtractHistogramRGB(img, &count_blue, 0, img.size().height, 0, img.size().width, 0);
@@ -114,10 +114,16 @@ int *SerialLHE::BuildLookUpTableRGB(int *hist_blue, int *hist_green, int *hist_r
     double *lut_red = BuildLookUpTable(prob_red);
     delete[] prob_red;
 
-    int *lut_final = new int[PIXEL_RANGE]();
+    double *lut_final = new double[PIXEL_RANGE]();
 
     for (auto i = 0; i < PIXEL_RANGE; i++)
-        lut_final[i] = (int)floor((lut_blue[i] + lut_green[i] + lut_red[i]) / 3.0);
+    {
+        lut_final[i] = (lut_blue[i] + lut_green[i] + lut_red[i]) / 3.0;
+        // std::cout << lut_final[i] << std::endl;
+        // std::cout << "blue: " << lut_blue[i] << std::endl;
+        // std::cout << "green: " << lut_green[i] << std::endl;
+        // std::cout << "red: " << lut_red[i] << std::endl;
+    }
 
     delete[] lut_blue, lut_green, lut_red;
     return lut_final;
@@ -130,21 +136,25 @@ void SerialLHE::Test(cv::Mat img)
     double *prob = CalculateProbability(hist, count);
     double *lut = BuildLookUpTable(prob);
 
-    for (auto i = 0; i < PIXEL_RANGE; i++)
-    {
-        std::cout << "i = " << i << " val = " << lut[i] << std::endl;
-    }
+    // for (auto i = 0; i < PIXEL_RANGE; i++)
+    // {
+    //     std::cout << "i = " << i << " val = " << lut[i] << std::endl;
+    // }
     // create empty base
     //  cv::Mat base(img.size(), CV_8UC1, cv::Scalar(0));
     //  this->ApplyLHEWithInterpol(base, img, 251);
     //  cv::imshow("base", base);
     //  cv::waitKey(0);
 
-    cv::Mat out(img.size().height * 0.35, img.size().width * 0.35, CV_8UC1, cv::Scalar(0));
-    cv::resize(img, out, cv::Size(), 1, 1);
-    cv::Mat base(out.size(), CV_8UC1, cv::Scalar(0));
-    this->ApplyLHE(base, out, 251);
-    cv::imwrite("base.jpg", base);
+    cv::Mat out(img.size().height * 0.85, img.size().width * 0.85, CV_MAKETYPE(CV_8U, img.channels()), cv::Scalar(0));
+    cv::resize(img, out, cv::Size(), 0.85, 0.85);
+    // print out dimentions
+    std::cout << "out.size().height = " << out.size().height << std::endl;
+    std::cout << "out.size().width = " << out.size().width << std::endl;
+    cv::Mat base(out.size(), CV_MAKETYPE(CV_8U, img.channels()), cv::Scalar(0));
+    std::cout << "here" << std::endl;
+    this->ApplyLHEWithInterpol(base, out, 151);
+    cv::imwrite("/home/toorajtaraz/Documents/university/MP/projects/phase1/mpche/images/base.jpg", base);
 }
 
 void SerialLHE::ApplyLHE(cv::Mat &base, cv::Mat img, int window)
@@ -238,17 +248,34 @@ void SerialLHE::ApplyLHEWithInterpol(cv::Mat &base, cv::Mat img, int window)
     int width = img.size().width;
     int max_i = height + ((int)floor(window / 2.0) - (height % (int)floor(window / 2.0)));
     int max_j = width + ((int)floor(window / 2.0) - (width % (int)floor(window / 2.0)));
+    // get number of channels
+    int channels = img.channels();
+    std::cout << "channels = " << channels << std::endl;
     for (auto i = 0; i <= max_i; i += offset)
     {
         for (auto j = 0; j <= max_j; j += offset)
         {
             int count = 0;
-            int *hist = ExtractHistogram(img, &count, i - offset, i + offset, j - offset, j + offset);
-            double *prob = CalculateProbability(hist, count);
-            double *lut = BuildLookUpTable(prob);
+            double *lut;
+            if (channels > 1)
+            {
+                int **channels_hist = new int *[channels];
+                for (auto k = 0; k < channels; k++)
+                {
+                    count = 0;
+                    channels_hist[k] = ExtractHistogramRGB(img, &count, i - offset, i + offset, j - offset, j + offset, k);
+                }
+                lut = BuildLookUpTableRGB(channels_hist[2], channels_hist[1], channels_hist[0], count);
+            }
+            else
+            {
+                int *hist = ExtractHistogram(img, &count, i - offset, i + offset, j - offset, j + offset);
+                double *prob = CalculateProbability(hist, count);
+                lut = BuildLookUpTable(prob);
+                delete[] hist;
+                delete[] prob;
+            }
             all_luts[std::make_tuple(i, j)] = lut;
-            delete[] hist;
-            delete[] prob;
         }
     }
 
@@ -275,11 +302,25 @@ void SerialLHE::ApplyLHEWithInterpol(cv::Mat &base, cv::Mat img, int window)
             double *upper_right_lut = all_luts[std::make_tuple(x1, y2)];
             double *lower_left_lut = all_luts[std::make_tuple(x2, y1)];
             double *lower_right_lut = all_luts[std::make_tuple(x2, y2)];
-
-            base.at<uchar>(i, j) = (uchar)ceil(upper_left_lut[img.at<uchar>(i, j)] * x2_weight * y2_weight +
-                                               upper_right_lut[img.at<uchar>(i, j)] * x2_weight * y1_weight +
-                                               lower_left_lut[img.at<uchar>(i, j)] * x1_weight * y2_weight +
-                                               lower_right_lut[img.at<uchar>(i, j)] * x1_weight * y1_weight);
+          
+            if (channels > 1)
+            {
+                for (auto k = 0; k < channels; k++)
+                {
+                    base.at<cv::Vec3b>(i, j)[k] = (uchar)ceil(
+                        upper_left_lut[img.at<cv::Vec3b>(i, j)[k]] * x2_weight * y2_weight +
+                        upper_right_lut[img.at<cv::Vec3b>(i, j)[k]] * x2_weight * y1_weight +
+                        lower_left_lut[img.at<cv::Vec3b>(i, j)[k]] * x1_weight * y2_weight +
+                        lower_right_lut[img.at<cv::Vec3b>(i, j)[k]] * x1_weight * y1_weight);
+                }
+            }
+            else
+            {
+                base.at<uchar>(i, j) = (uchar)ceil(upper_left_lut[img.at<uchar>(i, j)] * x2_weight * y2_weight +
+                                                   upper_right_lut[img.at<uchar>(i, j)] * x2_weight * y1_weight +
+                                                   lower_left_lut[img.at<uchar>(i, j)] * x1_weight * y2_weight +
+                                                   lower_right_lut[img.at<uchar>(i, j)] * x1_weight * y1_weight);
+            }
         }
     }
 
