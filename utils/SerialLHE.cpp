@@ -94,7 +94,7 @@ double *SerialLHE::BuildLookUpTable(double *prob)
     return lut;
 }
 
-double *SerialLHE::BuildLookUpTableRGB(int *hist_blue, int *hist_green, int *hist_red, int count)
+double *SerialLHE::BuildLookUpTableRGB(int *hist_blue, int *hist_green, int *hist_red, int count, bool free_sw)
 {
     // int count_blue = 0;
     // int *hist_blue = ExtractHistogramRGB(img, &count_blue, 0, img.size().height, 0, img.size().width, 0);
@@ -124,8 +124,12 @@ double *SerialLHE::BuildLookUpTableRGB(int *hist_blue, int *hist_green, int *his
         // std::cout << "green: " << lut_green[i] << std::endl;
         // std::cout << "red: " << lut_red[i] << std::endl;
     }
-
-    delete[] lut_blue, lut_green, lut_red;
+    if (free_sw)
+    {
+        delete[] lut_blue;
+        delete[] lut_green;
+        delete[] lut_red;
+    }
     return lut_final;
 }
 
@@ -146,14 +150,15 @@ void SerialLHE::Test(cv::Mat img)
     //  cv::imshow("base", base);
     //  cv::waitKey(0);
 
-    cv::Mat out(img.size().height * 0.85, img.size().width * 0.85, CV_MAKETYPE(CV_8U, img.channels()), cv::Scalar(0));
-    cv::resize(img, out, cv::Size(), 0.85, 0.85);
+    cv::Mat out(img.size().height * 0.15, img.size().width * 0.15, CV_MAKETYPE(CV_8U, img.channels()), cv::Scalar(0));
+    cv::resize(img, out, cv::Size(), 0.15, 0.15);
     // print out dimentions
     std::cout << "out.size().height = " << out.size().height << std::endl;
     std::cout << "out.size().width = " << out.size().width << std::endl;
     cv::Mat base(out.size(), CV_MAKETYPE(CV_8U, img.channels()), cv::Scalar(0));
     std::cout << "here" << std::endl;
-    this->ApplyLHEWithInterpol(base, out, 151);
+    // this->ApplyLHEWithInterpol(base, out, 151);
+    this->ApplyLHE(base, out, 151);
     cv::imwrite("/home/toorajtaraz/Documents/university/MP/projects/phase1/mpche/images/base.jpg", base);
 }
 
@@ -164,7 +169,22 @@ void SerialLHE::ApplyLHE(cv::Mat &base, cv::Mat img, int window)
     int width = img.size().width;
     int count = 0;
     int sw = 0;
-    int *hist = new int[PIXEL_RANGE]();
+    int channels = img.channels();
+    int **hists;
+    int *hist;
+    int temp;
+    if (channels > 1)
+    {
+        hists = new int *[channels];
+        for (auto i = 0; i < channels; i++)
+        {
+            hists[i] = new int[PIXEL_RANGE]();
+        }
+    }
+    else
+    {
+        hist = new int[PIXEL_RANGE]();
+    }
     for (int i = 0; i < height; i++)
     {
         sw = i % 2 == 0 ? 0 : 1;
@@ -176,25 +196,63 @@ void SerialLHE::ApplyLHE(cv::Mat &base, cv::Mat img, int window)
                 {
                     for (int n = 0; n < window; n++)
                     {
-                        ExtractHistogram(img, &count, i - 1 - offset, i - 1 - offset + 1, j + n - offset, j + n - offset + 1, hist, -1);
-                        ExtractHistogram(img, &count, i + window - 1 - offset, i + window - 1 - offset + 1, j + n - offset, j + n - offset + 1, hist, 1);
+                        if (channels > 1)
+                        {
+                            for (auto k = 0; k < channels; k++)
+                            {
+                                temp = count;
+                                ExtractHistogramRGB(img, &temp, i - 1 - offset, i - 1 - offset + 1, j + n - offset, j + n - offset + 1, k, hists[k], -1);
+                                ExtractHistogramRGB(img, &temp, i + window - 1 - offset, i + window - 1 - offset + 1, j + n - offset, j + n - offset + 1, k, hists[k], 1);
+                            }
+                            count = temp;
+                        }
+                        else
+                        {
+                            ExtractHistogram(img, &count, i - 1 - offset, i - 1 - offset + 1, j + n - offset, j + n - offset + 1, hist, -1);
+                            ExtractHistogram(img, &count, i + window - 1 - offset, i + window - 1 - offset + 1, j + n - offset, j + n - offset + 1, hist, 1);
+                        }
                     }
                 }
                 else if (j < (width - 1))
                 {
                     for (int n = 0; n < window; n++)
                     {
-                        ExtractHistogram(img, &count, i + n - offset, i + n - offset + 1, j - offset, j - offset + 1, hist, 1);
-                        ExtractHistogram(img, &count, i + n - offset, i + n - offset + 1, j + window - offset, j + window - offset + 1, hist, -1);
+                        if (channels > 1)
+                        {
+                            for (auto k = 0; k < channels; k++)
+                            {
+                                temp = count;
+                                ExtractHistogramRGB(img, &temp, i + n - offset, i + n - offset + 1, j - offset, j - offset + 1, k, hists[k], 1);
+                                ExtractHistogramRGB(img, &temp, i + n - offset, i + n - offset + 1, j + window - offset, j + window - offset + 1, k, hists[k], -1);
+                            }
+                            count = temp;
+                        }
+                        else
+                        {
+                            ExtractHistogram(img, &count, i + n - offset, i + n - offset + 1, j - offset, j - offset + 1, hist, 1);
+                            ExtractHistogram(img, &count, i + n - offset, i + n - offset + 1, j + window - offset, j + window - offset + 1, hist, -1);
+                        }
                     }
                 }
                 count = count > 0 ? count : 1;
-                double *prob = CalculateProbability(hist, count);
-                double *lut = BuildLookUpTable(prob);
-                base.at<uchar>(i, j) = (int)floor(lut[img.at<uchar>(i, j)]);
-                // Clean memory
-                delete[] prob;
-                delete[] lut;
+                if (channels > 1)
+                {
+                    double *lut = BuildLookUpTableRGB(hists[0], hists[1], hists[2], count, false);
+                    for (auto k = 0; k < channels; k++)
+                    {
+                        base.at<cv::Vec3b>(i, j)[k] = (uchar)lut[img.at<cv::Vec3b>(i, j)[k]];
+                    }
+                    delete[] lut;
+                }
+                else
+                {
+                    double *prob = CalculateProbability(hist, count);
+                    double *lut = BuildLookUpTable(prob);
+                    base.at<uchar>(i, j) = (int)floor(lut[img.at<uchar>(i, j)]);
+                    // Clean memory
+                    delete[] prob;
+                    delete[] lut;
+                }
             }
         }
         else
@@ -205,8 +263,21 @@ void SerialLHE::ApplyLHE(cv::Mat &base, cv::Mat img, int window)
                 {
                     for (int n = 0; n < window; n++)
                     {
-                        ExtractHistogram(img, &count, i - 1 - offset, i - 1 - offset + 1, j + n - offset, j + n - offset + 1, hist, -1);
-                        ExtractHistogram(img, &count, i + window - 1 - offset, i + window - 1 - offset + 1, j + n - offset, j + n - offset + 1, hist, 1);
+                        if (channels > 1)
+                        {
+                            for (auto k = 0; k < channels; k++)
+                            {
+                                temp = count;
+                                ExtractHistogramRGB(img, &temp, i - 1 - offset, i - 1 - offset + 1, j + n - offset, j + n - offset + 1, k, hists[k], -1);
+                                ExtractHistogramRGB(img, &temp, i + window - 1 - offset, i + window - 1 - offset + 1, j + n - offset, j + n - offset + 1, k, hists[k], 1);
+                            }
+                            count = temp;
+                        }
+                        else
+                        {
+                            ExtractHistogram(img, &count, i - 1 - offset, i - 1 - offset + 1, j + n - offset, j + n - offset + 1, hist, -1);
+                            ExtractHistogram(img, &count, i + window - 1 - offset, i + window - 1 - offset + 1, j + n - offset, j + n - offset + 1, hist, 1);
+                        }
                     }
                 }
                 else if (j == 0 && i == 0)
@@ -215,7 +286,19 @@ void SerialLHE::ApplyLHE(cv::Mat &base, cv::Mat img, int window)
                     {
                         for (int m = 0; m < window; m++)
                         {
-                            ExtractHistogram(img, &count, i + n - offset, i + n - offset + 1, j + m - offset, j + m - offset + 1, hist, 1);
+                            if (channels > 1)
+                            {
+                                for (auto k = 0; k < channels; k++)
+                                {
+                                    temp = count;
+                                    ExtractHistogramRGB(img, &temp, i + n - offset, i + n - offset + 1, j + m - offset, j + m - offset + 1, k, hists[k], 1);
+                                }
+                                count = temp;
+                            }
+                            else
+                            {
+                                ExtractHistogram(img, &count, i + n - offset, i + n - offset + 1, j + m - offset, j + m - offset + 1, hist, 1);
+                            }
                         }
                     }
                 }
@@ -223,21 +306,57 @@ void SerialLHE::ApplyLHE(cv::Mat &base, cv::Mat img, int window)
                 {
                     for (int n = 0; n < window; n++)
                     {
-                        ExtractHistogram(img, &count, i + n - offset, i + n - offset + 1, j - 1 - offset, j - 1 - offset + 1, hist, -1);
-                        ExtractHistogram(img, &count, i + n - offset, i + n - offset + 1, j + window - 1 - offset, j + window - 1 - offset + 1, hist, 1);
+                        if (channels > 1)
+                        {
+                            for (auto k = 0; k < channels; k++)
+                            {
+                                temp = count;
+                                ExtractHistogramRGB(img, &temp, i + n - offset, i + n - offset + 1, j - 1 - offset, j - 1 - offset + 1, k, hists[k], -1);
+                                ExtractHistogramRGB(img, &temp, i + n - offset, i + n - offset + 1, j + window - 1 - offset, j + window - 1 - offset + 1, k, hists[k], 1);
+                            }
+                            count = temp;
+                        }
+                        else
+                        {
+                            ExtractHistogram(img, &count, i + n - offset, i + n - offset + 1, j - 1 - offset, j - 1 - offset + 1, hist, -1);
+                            ExtractHistogram(img, &count, i + n - offset, i + n - offset + 1, j + window - 1 - offset, j + window - 1 - offset + 1, hist, 1);
+                        }
                     }
                 }
                 count = count > 0 ? count : 1;
-                double *prob = CalculateProbability(hist, count);
-                double *lut = BuildLookUpTable(prob);
-                base.at<uchar>(i, j) = (int)floor(lut[img.at<uchar>(i, j)]);
-                // Clean memory
-                delete[] prob;
-                delete[] lut;
+                if (channels > 1)
+                {
+                    double *lut = BuildLookUpTableRGB(hists[0], hists[1], hists[2], count, false);
+                    for (auto k = 0; k < channels; k++)
+                    {
+                        base.at<cv::Vec3b>(i, j)[k] = (uchar)lut[img.at<cv::Vec3b>(i, j)[k]];
+                    }
+                    delete[] lut;
+                }
+                else
+                {
+                    double *prob = CalculateProbability(hist, count);
+                    double *lut = BuildLookUpTable(prob);
+                    base.at<uchar>(i, j) = (int)floor(lut[img.at<uchar>(i, j)]);
+                    // Clean memory
+                    delete[] prob;
+                    delete[] lut;
+                }
             }
         }
     }
-    delete[] hist;
+    if (channels > 1)
+    {
+        //delete channels
+        for (auto k = 0; k < channels; k++)
+        {
+            delete[] hists[k];
+        }
+    }
+    else
+    {
+        delete[] hist;
+    }
 }
 
 void SerialLHE::ApplyLHEWithInterpol(cv::Mat &base, cv::Mat img, int window)
@@ -302,7 +421,7 @@ void SerialLHE::ApplyLHEWithInterpol(cv::Mat &base, cv::Mat img, int window)
             double *upper_right_lut = all_luts[std::make_tuple(x1, y2)];
             double *lower_left_lut = all_luts[std::make_tuple(x2, y1)];
             double *lower_right_lut = all_luts[std::make_tuple(x2, y2)];
-          
+
             if (channels > 1)
             {
                 for (auto k = 0; k < channels; k++)
