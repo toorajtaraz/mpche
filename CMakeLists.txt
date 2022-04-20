@@ -11,11 +11,13 @@ set( NAME_SRC
   mpche.cpp
   utils/ocv_wrappers.cpp
   utils/SerialLHE.cpp
+  utils/ParallelLHE.cpp
 )
 
 set( NAME_HEADERS
   headers/ocv_wrappers.h
   headers/SerialLHE.h
+  headers/ParallelLHE.h
 )
 
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/headers )
