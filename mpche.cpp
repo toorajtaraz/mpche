@@ -3,6 +3,7 @@
 #include <opencv2/opencv.hpp>
 #include "headers/SerialLHE.h"
 /*TOORAJ INCLUDES BEGIN*/
+#include "headers/ParallelLHE.h"
 /*TOORAJ INCLUDES END*/
 
 /*ALI INCLUDES BEGIN*/
@@ -13,6 +14,7 @@
 using namespace cv;
 
 /*TOORAJ GLOBALS BEGIN*/
+#define T_NUM_THREADS 12
 /*TOORAJ GLOBALS END*/
 
 /*ALI GLOBALS BEGIN*/
@@ -31,9 +33,13 @@ int main(int argc, char **argv)
     /*PAIR SESS END*/
 
     /*TOORAJ BEGIN*/
-    // SerialLHE slhe;
-    // Mat img = imread("/home/toorajtaraz/Documents/university/MP/projects/phase1/mpche/images/he2.jpg");
-    // slhe.Test(img);
+    int t ;
+    sscanf(argv[1], "%d", &t);
+    omp_set_num_threads(t);
+    ParallelLHE plhe;
+    SerialLHE slhe;
+    Mat img = imread("/home/toorajtaraz/Documents/university/MP/projects/phase1/mpche/images/he8.jpg", 0);
+    plhe.Test(img);
     /*TOORAJ END*/
 
     /*ALI BEGIN*/

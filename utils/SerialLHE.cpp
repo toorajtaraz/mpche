@@ -150,8 +150,8 @@ void SerialLHE::Test(cv::Mat img)
     //  cv::imshow("base", base);
     //  cv::waitKey(0);
 
-    cv::Mat out(img.size().height * 0.15, img.size().width * 0.15, CV_MAKETYPE(CV_8U, img.channels()), cv::Scalar(0));
-    cv::resize(img, out, cv::Size(), 0.15, 0.15);
+    cv::Mat out(img.size().height * 1, img.size().width * 1, CV_MAKETYPE(CV_8U, img.channels()), cv::Scalar(0));
+    cv::resize(img, out, cv::Size(), 1, 1);
     // print out dimentions
     std::cout << "out.size().height = " << out.size().height << std::endl;
     std::cout << "out.size().width = " << out.size().width << std::endl;

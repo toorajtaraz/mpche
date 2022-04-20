@@ -9,7 +9,7 @@ private:
     double *CalculateProbability(int *hist, int total_pixels);
     double *BuildLookUpTable(double *prob);
     double *BuildLookUpTableRGB(int *hist_blue, int *hist_green, int *hist_red, int count, bool free_sw = true);
-    void ApplyLHE(cv::Mat &base, cv::Mat img, int window, int i_start, int i_end, int j_start, int j_end);
+    void ApplyLHEHelper(cv::Mat &base, cv::Mat img, int window, int i_start, int i_end);
 
 public:
     void Test(cv::Mat img);
