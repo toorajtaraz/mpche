@@ -353,7 +353,6 @@ void ParallelLHE::ApplyLHEHelper(cv::Mat &base, cv::Mat img, int window, int i_s
 }
 void ParallelLHE::ApplyLHE(cv::Mat &base, cv::Mat img, int window)
 {
-// omp_set_num_threads(img.rows / window);
 #pragma omp parallel
     {
         int n_threads = omp_get_num_threads();
