@@ -2,6 +2,8 @@
 #include <omp.h>
 #include <opencv2/opencv.hpp>
 #include "headers/SerialLHE.h"
+#include "headers/video_extract.h"
+
 /*TOORAJ INCLUDES BEGIN*/
 /*TOORAJ INCLUDES END*/
 
@@ -40,6 +42,11 @@ int main(int argc, char **argv)
     /*ALI END*/
 
     /*PARIYA BEGIN*/
+    videoExtract video;
+    std::vector<Mat> frames;
+    video.extract_frames("C:\\Users\\win10\\Desktop\\video1.mp4",frames);
+    std::cout << "finish message: " << "extract frames from video done!" << std::endl;
+   
     /*PARIYA END*/
     return 0;
 }
