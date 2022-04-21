@@ -2,7 +2,7 @@
 #include <omp.h>
 #include <opencv2/opencv.hpp>
 #include "headers/SerialLHE.h"
-#include "headers/video_extract.h"
+
 
 /*TOORAJ INCLUDES BEGIN*/
 /*TOORAJ INCLUDES END*/
@@ -11,6 +11,7 @@
 /*ALI INCLUDES END*/
 
 /*PARIYA INCLUDES BEGIN*/
+#include "headers/video_extract.h"
 /*PARIYA INCLUDES END*/
 using namespace cv;
 
@@ -42,6 +43,7 @@ int main(int argc, char **argv)
     /*ALI END*/
 
     /*PARIYA BEGIN*/
+
     videoExtract video;
     std::vector<Mat> frames;
     video.extract_frames("C:\\Users\\win10\\Desktop\\video1.mp4",frames);
