@@ -7,6 +7,8 @@
 /*TOORAJ INCLUDES END*/
 
 /*ALI INCLUDES BEGIN*/
+#include "headers/ParallelFastLHE.h"
+#include <chrono>
 /*ALI INCLUDES END*/
 
 /*PARIYA INCLUDES BEGIN*/
@@ -18,6 +20,7 @@ using namespace cv;
 /*TOORAJ GLOBALS END*/
 
 /*ALI GLOBALS BEGIN*/
+using namespace std::chrono;
 /*ALI GLOBALS END*/
 
 /*PARIYA GLOBALS BEGIN*/
@@ -43,6 +46,20 @@ int main(int argc, char **argv)
     /*TOORAJ END*/
 
     /*ALI BEGIN*/
+    for (auto a_t = 1; a_t <= 16; a_t++)
+    {
+        auto a_start = high_resolution_clock::now();
+
+        omp_set_num_threads(a_t);
+        ParallelFastLHE a_pflhe;
+        Mat a_img = imread("/home/mpche/images/tree.jpg", 1);
+        a_pflhe.Test(a_img);
+        auto a_stop = high_resolution_clock::now();
+        auto a_duration = duration_cast<microseconds>(a_stop - a_start);
+
+        std::cout << "num of threads: " << a_t << " : " << a_duration.count() / 1000 << " milliseconds" << std::endl;
+    }
+
     /*ALI END*/
 
     /*PARIYA BEGIN*/
