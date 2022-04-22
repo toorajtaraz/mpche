@@ -37,18 +37,18 @@ int main(int argc, char **argv)
     /*TOORAJ END*/
 
     /*ALI BEGIN*/
-    for (auto t = 1; t <= 16; t++)
+    for (auto a_t = 1; a_t <= 16; a_t++)
     {
-        auto start = high_resolution_clock::now();
+        auto a_start = high_resolution_clock::now();
 
-        omp_set_num_threads(t);
-        ParallelFastLHE pflhe;
-        Mat img = imread("/home/mpche/images/tree.jpg", 1);
-        pflhe.Test(img);
-        auto stop = high_resolution_clock::now();
-        auto duration = duration_cast<microseconds>(stop - start);
+        omp_set_num_threads(a_t);
+        ParallelFastLHE a_pflhe;
+        Mat a_img = imread("/home/mpche/images/tree.jpg", 1);
+        a_pflhe.Test(a_img);
+        auto a_stop = high_resolution_clock::now();
+        auto a_duration = duration_cast<microseconds>(a_stop - a_start);
 
-        std::cout << "num of threads: " << t << " : " << duration.count() / 1000 << " milliseconds" << std::endl;
+        std::cout << "num of threads: " << a_t << " : " << a_duration.count() / 1000 << " milliseconds" << std::endl;
     }
 
     /*ALI END*/
