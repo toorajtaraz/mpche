@@ -146,10 +146,7 @@ void ParallelLHE::Test(cv::Mat img)
     cv::Mat out(img.size().height * r, img.size().width * r, CV_MAKETYPE(CV_8U, img.channels()), cv::Scalar(0));
     cv::resize(img, out, cv::Size(), r, r);
     // print out dimentions
-    std::cout << "out.size().height = " << out.size().height << std::endl;
-    std::cout << "out.size().width = " << out.size().width << std::endl;
     cv::Mat base(out.size(), CV_MAKETYPE(CV_8U, img.channels()), cv::Scalar(0));
-    std::cout << "here" << std::endl;
     // this->ApplyLHEWithInterpol(base, out, 151);
     this->ApplyLHE(base, out, 251);
     cv::imwrite("/home/toorajtaraz/Documents/university/MP/projects/phase1/mpche/images/base.jpg", base);
@@ -359,10 +356,7 @@ void ParallelLHE::ApplyLHE(cv::Mat &base, cv::Mat img, int window)
         int thread_id = omp_get_thread_num();
         int i_start = thread_id * (base.rows / n_threads);
         int i_end = (thread_id + 1) * (base.rows / n_threads);
-#pragma omp critical
-        {
-            std::cout << "Thread " << thread_id << ": " << i_start << " - " << i_end << std::endl;
-        }
+
         if (thread_id == n_threads - 1)
         {
             i_end = base.rows;
