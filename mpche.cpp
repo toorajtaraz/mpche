@@ -46,7 +46,7 @@ int main(int argc, char **argv)
 
     videoExtract video;
     std::vector<Mat> frames;
-    video.extract_frames("C:\\Users\\win10\\Desktop\\video1.mp4",frames);
+    video.extract_frames("/mpche/images/test.avi",frames);
     std::cout << "finish message: " << "extract frames from video done!" << std::endl;
    
     /*PARIYA END*/
