@@ -38,7 +38,6 @@ int main(int argc, char **argv)
     }
     /*PAIR SESS START*/
     int color = 0;
-    int bflag = 0;
     char *input_path = NULL;
     char *output_path = NULL;
     int thread_num = 1;
