@@ -6,6 +6,7 @@
 /*TOORAJ INCLUDES END*/
 
 /*ALI INCLUDES BEGIN*/
+#include "headers/ParallelFastLHE.h"
 /*ALI INCLUDES END*/
 
 /*PARIYA INCLUDES BEGIN*/
@@ -37,6 +38,12 @@ int main(int argc, char **argv)
     /*TOORAJ END*/
 
     /*ALI BEGIN*/
+    int t;
+    sscanf(argv[1], "%d", &t);
+    omp_set_num_threads(t);
+    ParallelFastLHE pflhe;
+    Mat img = imread("/home/mpche/images/he4.jpg", 1);
+    pflhe.Test(img);
     /*ALI END*/
 
     /*PARIYA BEGIN*/
