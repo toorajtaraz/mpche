@@ -237,7 +237,7 @@ void SerialLHE::ApplyLHE(cv::Mat &base, cv::Mat img, int window)
                 count = count > 0 ? count : 1;
                 if (channels > 1)
                 {
-                    double *lut = BuildLookUpTableRGB(hists[0], hists[1], hists[2], count, false);
+                    double *lut = BuildLookUpTableRGB(hists[0], hists[1], hists[2], count, true);
                     for (auto k = 0; k < channels; k++)
                     {
                         base.at<cv::Vec3b>(i, j)[k] = (uchar)lut[img.at<cv::Vec3b>(i, j)[k]];
@@ -326,7 +326,7 @@ void SerialLHE::ApplyLHE(cv::Mat &base, cv::Mat img, int window)
                 count = count > 0 ? count : 1;
                 if (channels > 1)
                 {
-                    double *lut = BuildLookUpTableRGB(hists[0], hists[1], hists[2], count, false);
+                    double *lut = BuildLookUpTableRGB(hists[0], hists[1], hists[2], count, true);
                     for (auto k = 0; k < channels; k++)
                     {
                         base.at<cv::Vec3b>(i, j)[k] = (uchar)lut[img.at<cv::Vec3b>(i, j)[k]];
