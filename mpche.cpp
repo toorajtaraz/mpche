@@ -12,6 +12,7 @@
 
 /*PARIYA INCLUDES BEGIN*/
 #include "headers/video_extract.h"
+#include "headers/video_create.h"
 /*PARIYA INCLUDES END*/
 using namespace cv;
 
@@ -44,11 +45,23 @@ int main(int argc, char **argv)
 
     /*PARIYA BEGIN*/
 
-    videoExtract video;
-    std::vector<Mat> frames;
-    video.extract_frames("/mpche/images/test.avi",frames);
-    std::cout << "finish message: " << "extract frames from video done!" << std::endl;
-   
+    // videoExtract video;
+    // std::vector<Mat> frames;
+    // video.extract_frames("/mpche/images/test.avi",frames);
+    // std::cout << "finish message: " << "extract frames from video done!" << std::endl;
+
+    SerialLHE slhe;
+    std::vector<Mat> out_put_frames;
+    for (int i = 0; i < 3; i++) {
+        std::string address_file = "/mpche/images/" + std::to_string(i+1) + ".jpg";
+        std::cout <<"address: " << address_file << std::endl;
+        Mat img = imread(address_file);
+        slhe.Test(img,out_put_frames);
+    }
+    std::cout << "start to creating video" << std::endl;
+    videoCreate videoCreate;
+    videoCreate.create_video("/mpche/images/output.mp4",out_put_frames);
+    std:: cout << "Finished writing" << std::endl;
     /*PARIYA END*/
     return 0;
 }

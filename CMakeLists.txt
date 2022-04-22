@@ -12,12 +12,14 @@ set( NAME_SRC
   utils/ocv_wrappers.cpp
   utils/SerialLHE.cpp
   utils/video_extract.cpp
+  utils/video_create.cpp
 )
 
 set( NAME_HEADERS
   headers/ocv_wrappers.h
   headers/SerialLHE.h
   headers/video_extract.h
+  headers/video_create.h
 )
 
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/headers )
