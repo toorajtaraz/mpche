@@ -125,26 +125,74 @@ double *ParallelFastLHE::BuildLookUpTableRGB(int *hist_blue, int *hist_green, in
 void ParallelFastLHE::Test(cv::Mat img)
 {
     cv::Mat base(img.size(), CV_8UC3, cv::Scalar(0));
-    this->ApplyLHEWithInterpol(base, img, 151);
+    this->ApplyLHEWithInterpolation(base, img, 151);
     cv::imwrite("base.jpg", base);
 }
 
-void ParallelFastLHE::ApplyLHEWithInterpol(cv::Mat &base, cv::Mat img, int window)
+void ParallelFastLHE::ApplyLHEWithInterpolHelper(cv::Mat &base, cv::Mat img, int window, int i_start, int i_end, std::map<std::tuple<int, int>, double *> all_luts)
 {
-    std::map<std::tuple<int, int>, double *> all_luts;
     int offset = (int)floor(window / 2.0);
     int height = img.size().height;
     int width = img.size().width;
-    int max_i = height + ((int)floor(window / 2.0) - (height % (int)floor(window / 2.0)));
-    int max_j = width + ((int)floor(window / 2.0) - (width % (int)floor(window / 2.0)));
-    // get number of channels
+    int max_i = i_end + (offset - (height % offset));
+    int max_j = width + (offset - (width % offset));
     int channels = img.channels();
-    std::cout << "channels = " << channels << std::endl;
-#pragma omp parallel
+
+    // Interpolating local histogram equalization
+    int padding_h = (height + (offset - height % offset)) - height;
+    int padding_w = (width + (offset - width % offset)) - width;
+
+    // Iterate over the image
+    for (auto i = i_start; i < i_end; i++)
     {
-        for (auto i = 0; i <= max_i; i += offset)
+        for (auto j = 0; j < width; j++)
         {
-            for (auto j = 0; j <= max_j; j += offset)
+            int x1 = i - (i % offset);
+            int y1 = j - (j % offset);
+            int x2 = x1 + offset;
+            int y2 = y1 + offset;
+
+            float x1_weight = (float)(i - x1) / (float)(x2 - x1);
+            float y1_weight = (float)(j - y1) / (float)(y2 - y1);
+            float x2_weight = (float)(x2 - i) / (float)(x2 - x1);
+            float y2_weight = (float)(y2 - j) / (float)(y2 - y1);
+
+            double *upper_left_lut = all_luts[std::make_tuple(x1, y1)];
+            double *upper_right_lut = all_luts[std::make_tuple(x1, y2)];
+            double *lower_left_lut = all_luts[std::make_tuple(x2, y1)];
+            double *lower_right_lut = all_luts[std::make_tuple(x2, y2)];
+
+            if (channels > 1)
+            {
+                for (auto k = 0; k < channels; k++)
+                {
+
+                    base.at<cv::Vec3b>(i, j)[k] = ceil(
+                        upper_left_lut[img.at<cv::Vec3b>(i, j)[k]] * x2_weight * y2_weight +
+                        upper_right_lut[img.at<cv::Vec3b>(i, j)[k]] * x2_weight * y1_weight +
+                        lower_left_lut[img.at<cv::Vec3b>(i, j)[k]] * x1_weight * y2_weight +
+                        lower_right_lut[img.at<cv::Vec3b>(i, j)[k]] * x1_weight * y1_weight);
+                }
+            }
+            else
+            {
+                base.at<uchar>(i, j) = (uchar)ceil(upper_left_lut[img.at<uchar>(i, j)] * x2_weight * y2_weight +
+                                                   upper_right_lut[img.at<uchar>(i, j)] * x2_weight * y1_weight +
+                                                   lower_left_lut[img.at<uchar>(i, j)] * x1_weight * y2_weight +
+                                                   lower_right_lut[img.at<uchar>(i, j)] * x1_weight * y1_weight);
+            }
+        }
+    }
+}
+
+void ParallelFastLHE::BuildAllLuts(std::map<std::tuple<int, int>, double *> &all_luts, cv::Mat img, int offset, int i_start, int i_end, int j_start, int j_end)
+{
+    int channels = img.channels();
+    for (auto i = i_start; i < i_end; i++)
+    {
+        if (i % offset == 0)
+        {
+            for (auto j = 0; j <= j_end; j += offset)
             {
                 int count = 0;
                 double *lut;
@@ -170,67 +218,49 @@ void ParallelFastLHE::ApplyLHEWithInterpol(cv::Mat &base, cv::Mat img, int windo
                 }
 #pragma omp critical
                 {
+
                     all_luts[std::make_tuple(i, j)] = lut;
                 }
             }
         }
     }
+}
 
-    // Interpolating local histogram equalization
-    int padding_h = (height + ((int)floor((float)window / 2.0) - height % (int)floor((float)window / 2.0))) - height;
-    int padding_w = (width + ((int)floor((float)window / 2.0) - width % (int)floor((float)window / 2.0))) - width;
-
-// Iterate over the image
+void ParallelFastLHE::ApplyLHEWithInterpolation(cv::Mat &base, cv::Mat img, int window)
+{
+    std::map<std::tuple<int, int>, double *> all_luts;
+    int offset = (int)floor(window / 2.0);
+    int height = img.size().height;
+    int width = img.size().width;
+    int max_i = height + (offset - (height % offset));
+    int max_j = width + (offset - (width % offset));
+    int channels = img.channels();
 #pragma omp parallel
     {
-        for (auto i = 0; i < height; i++)
+        int n_threads = omp_get_num_threads();
+        int thread_id = omp_get_thread_num();
+        int i_start = thread_id * (max_i / n_threads);
+        int i_end = (thread_id + 1) * (max_i / n_threads);
+        if (thread_id == n_threads - 1)
         {
-            for (auto j = 0; j < width; j++)
-            {
-                int x1 = i - (i % (int)floor((float)window / 2.0));
-                int y1 = j - (j % (int)floor((float)window / 2.0));
-                int x2 = x1 + (int)floor((float)window / 2.0);
-                int y2 = y1 + (int)floor((float)window / 2.0);
-
-                float x1_weight = (float)(i - x1) / (float)(x2 - x1);
-                float y1_weight = (float)(j - y1) / (float)(y2 - y1);
-                float x2_weight = (float)(x2 - i) / (float)(x2 - x1);
-                float y2_weight = (float)(y2 - j) / (float)(y2 - y1);
-
-                double *upper_left_lut = all_luts[std::make_tuple(x1, y1)];
-                double *upper_right_lut = all_luts[std::make_tuple(x1, y2)];
-                double *lower_left_lut = all_luts[std::make_tuple(x2, y1)];
-                double *lower_right_lut = all_luts[std::make_tuple(x2, y2)];
-
-                if (channels > 1)
-                {
-                    for (auto k = 0; k < channels; k++)
-                    {
-#pragma omp critical
-                        {
-                            base.at<cv::Vec3b>(i, j)[k] = ceil(
-                                upper_left_lut[img.at<cv::Vec3b>(i, j)[k]] * x2_weight * y2_weight +
-                                upper_right_lut[img.at<cv::Vec3b>(i, j)[k]] * x2_weight * y1_weight +
-                                lower_left_lut[img.at<cv::Vec3b>(i, j)[k]] * x1_weight * y2_weight +
-                                lower_right_lut[img.at<cv::Vec3b>(i, j)[k]] * x1_weight * y1_weight);
-                        }
-                    }
-                }
-                else
-                {
-#pragma omp critical
-                    {
-                        base.at<uchar>(i, j) = (uchar)ceil(upper_left_lut[img.at<uchar>(i, j)] * x2_weight * y2_weight +
-                                                           upper_right_lut[img.at<uchar>(i, j)] * x2_weight * y1_weight +
-                                                           lower_left_lut[img.at<uchar>(i, j)] * x1_weight * y2_weight +
-                                                           lower_right_lut[img.at<uchar>(i, j)] * x1_weight * y1_weight);
-                    }
-                }
-            }
+            i_end = max_i + 1;
         }
+        BuildAllLuts(all_luts, img, offset, i_start, i_end, 0, max_j);
     }
 
-    // Cleaning all_luts
+#pragma omp parallel
+    {
+        int n_threads = omp_get_num_threads();
+        int thread_id = omp_get_thread_num();
+        int i_start = thread_id * (base.rows / n_threads);
+        int i_end = (thread_id + 1) * (base.rows / n_threads);
+        if (thread_id == n_threads - 1)
+        {
+            i_end = base.rows;
+        }
+        ApplyLHEWithInterpolHelper(base, img, window, i_start, i_end, all_luts);
+    }
+
     for (auto it = all_luts.begin(); it != all_luts.end(); it++)
     {
         delete[] it->second;
