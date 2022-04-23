@@ -546,3 +546,11 @@ All you need to do is to pass &ldquo;-h&rdquo; to our executable to get this hel
 > Stream: 1 for video, 0 for single image
 > Window: Size of the window
 
+## Authors
+<!-- + Tooraj Taraz ([@ToorajTaraz](https://github.com/ToorajTaraz))
++ Ali Nakhaee ([@alinakhaee](https://github.com/alinakhaee))
++ Pariya AbadehE ([@pariyaab](https://github.com/pariyaab)) -->
+
+
+| [<img class="avatar avatar-user" src="https://avatars.githubusercontent.com/u/64916254?v=4" width="75px;"/><br/>Tooraj Taraz](https://github.com/ToorajTaraz)<br/>  | [<img class="avatar avatar-user" src="https://avatars.githubusercontent.com/u/47724896?v=4" width="75px;"/><br/>Ali Nakhaee Sharif](https://github.com/alinakhaee)<br/> | [<img class="avatar avatar-user" src="https://avatars.githubusercontent.com/u/46067199?v=4" width="75px;" /><br/>Pariya AbadehE](https://github.com/pariyaab)<br/> |
+| :---: | :---: | :---: |
