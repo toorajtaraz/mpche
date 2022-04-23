@@ -11,6 +11,7 @@ set( NAME_SRC
   mpche.cpp
   utils/ocv_wrappers.cpp
   utils/SerialLHE.cpp
+  utils/VideoCreator.cpp
   utils/ParallelLHE.cpp
   utils/ParallelFastLHE.cpp
 )
@@ -18,6 +19,7 @@ set( NAME_SRC
 set( NAME_HEADERS
   headers/ocv_wrappers.h
   headers/SerialLHE.h
+  headers/VideoCreator.h
   headers/ParallelLHE.h
   headers/ParallelFastLHE.h
 )

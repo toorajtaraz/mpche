@@ -2,6 +2,8 @@
 #include <omp.h>
 #include <opencv2/opencv.hpp>
 #include "headers/SerialLHE.h"
+
+
 /*TOORAJ INCLUDES BEGIN*/
 #include "headers/ParallelLHE.h"
 #include <ctype.h>
@@ -16,6 +18,7 @@
 /*ALI INCLUDES END*/
 
 /*PARIYA INCLUDES BEGIN*/
+#include "headers/video_create.h"
 /*PARIYA INCLUDES END*/
 using namespace cv;
 
