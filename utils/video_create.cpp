@@ -7,7 +7,7 @@
 using namespace std;
 using namespace cv;
 
-void videoCreate::create_video(const std::string &videoFilePath , std:: vector<cv::Mat> & images){
+void VideoCreator::create_video(const std::string &videoFilePath , std:: vector<cv::Mat> & images){
 
     Size size = images[0].size(); 
     cout  << size << endl;

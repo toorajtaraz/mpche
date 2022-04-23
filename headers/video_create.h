@@ -2,7 +2,7 @@
 #define VIDEO_CREATE_H_
 #include <opencv2/opencv.hpp>
 
-class videoCreate
+class VideoCreator
 {
 
 public:
