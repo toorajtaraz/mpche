@@ -201,7 +201,8 @@ int main(int argc, char **argv)
 
     if (is_stream == 1)
     {
-        // TODO: Video mode
+        VideoCreator vc;
+        vc.videoHandlerPipeline(input_path, output_path, thread_num, mode, color, w);
     }
     else
     {
