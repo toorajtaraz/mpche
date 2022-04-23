@@ -4,11 +4,6 @@
 class ParallelFastLHE
 {
 private:
-    int *ExtractHistogram(cv::Mat img, int *count, int x_start, int x_end, int y_start, int y_end, int *histt = NULL, int sw = 1);
-    int *ExtractHistogramRGB(cv::Mat img, int *count, int x_start, int x_end, int y_start, int y_end, short channel, int *histt = NULL, int sw = 1);
-    double *CalculateProbability(int *hist, int total_pixels);
-    double *BuildLookUpTable(double *prob);
-    double *BuildLookUpTableRGB(int *hist_blue, int *hist_green, int *hist_red, int count, bool free_sw = true);
     void BuildAllLuts(std::map<std::tuple<int, int>, double *> &all_luts, cv::Mat img, int offset, int i_start, int i_end, int j_start, int j_end);
 
 public:
