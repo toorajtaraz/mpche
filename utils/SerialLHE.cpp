@@ -133,7 +133,7 @@ double *SerialLHE::BuildLookUpTableRGB(int *hist_blue, int *hist_green, int *his
     return lut_final;
 }
 
-void SerialLHE::Test(cv::Mat img,std:: vector< cv::Mat> & frames)
+void SerialLHE::Test(cv::Mat img)
 {
     int count = 0;
     int *hist = ExtractHistogram(img, &count, 0, img.size().height, 0, img.size().width);
@@ -150,8 +150,8 @@ void SerialLHE::Test(cv::Mat img,std:: vector< cv::Mat> & frames)
     //  cv::imshow("base", base);
     //  cv::waitKey(0);
 
-    cv::Mat out(img.size().height * 0.15, img.size().width * 0.15, CV_MAKETYPE(CV_8U, img.channels()), cv::Scalar(0));
-    cv::resize(img, out, cv::Size(), 0.15, 0.15);
+    cv::Mat out(img.size().height * 1, img.size().width * 1, CV_MAKETYPE(CV_8U, img.channels()), cv::Scalar(0));
+    cv::resize(img, out, cv::Size(), 1, 1);
     // print out dimentions
     std::cout << "out.size().height = " << out.size().height << std::endl;
     std::cout << "out.size().width = " << out.size().width << std::endl;
@@ -159,8 +159,7 @@ void SerialLHE::Test(cv::Mat img,std:: vector< cv::Mat> & frames)
     std::cout << "here" << std::endl;
     // this->ApplyLHEWithInterpol(base, out, 151);
     this->ApplyLHE(base, out, 151);
-    // cv::imwrite("/home/toorajtaraz/Documents/university/MP/projects/phase1/mpche/images/base.jpg", base);
-    frames.push_back(base);
+    cv::imwrite("/home/toorajtaraz/Documents/university/MP/projects/phase1/mpche/images/base.jpg", base);
 }
 
 void SerialLHE::ApplyLHE(cv::Mat &base, cv::Mat img, int window)
@@ -238,7 +237,7 @@ void SerialLHE::ApplyLHE(cv::Mat &base, cv::Mat img, int window)
                 count = count > 0 ? count : 1;
                 if (channels > 1)
                 {
-                    double *lut = BuildLookUpTableRGB(hists[0], hists[1], hists[2], count, false);
+                    double *lut = BuildLookUpTableRGB(hists[0], hists[1], hists[2], count, true);
                     for (auto k = 0; k < channels; k++)
                     {
                         base.at<cv::Vec3b>(i, j)[k] = (uchar)lut[img.at<cv::Vec3b>(i, j)[k]];
@@ -327,7 +326,7 @@ void SerialLHE::ApplyLHE(cv::Mat &base, cv::Mat img, int window)
                 count = count > 0 ? count : 1;
                 if (channels > 1)
                 {
-                    double *lut = BuildLookUpTableRGB(hists[0], hists[1], hists[2], count, false);
+                    double *lut = BuildLookUpTableRGB(hists[0], hists[1], hists[2], count, true);
                     for (auto k = 0; k < channels; k++)
                     {
                         base.at<cv::Vec3b>(i, j)[k] = (uchar)lut[img.at<cv::Vec3b>(i, j)[k]];

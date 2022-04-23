@@ -11,7 +11,7 @@ private:
     double *BuildLookUpTableRGB(int *hist_blue, int *hist_green, int *hist_red, int count, bool free_sw = true);
 
 public:
-    void Test(cv::Mat img,std:: vector< cv::Mat> & frames);
+    void Test(cv::Mat img);
     void ApplyLHEWithInterpol(cv::Mat &base, cv::Mat img, int window);
     void ApplyLHE(cv::Mat &base, cv::Mat img, int window);
 };
