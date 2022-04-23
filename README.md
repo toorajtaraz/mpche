@@ -33,7 +33,7 @@
 ## Handling video stream
 
 We simply iterate over frames of input stream and write each manipulated frame to output stream. The iteration for is simply a omp for block and reading the frames and writing them are critical sections. Here we can see the main loop:
-
+```cpp
     #pragma omp parallel num_threads(thread_num)
             {
     #pragma omp for
@@ -51,7 +51,7 @@ We simply iterate over frames of input stream and write each manipulated frame t
                     }
                 }
             }
-
+```
 
 <a id="orgc226b97"></a>
 
@@ -91,7 +91,7 @@ The way local histogram equalization works is that we iterate through each pixel
         │                                      │
         │                                      │
         └──────────────────────────────────────┘
-
+```cpp
     void ParallelLHE::ApplyLHEHelper(cv::Mat &base, cv::Mat img, int window, int i_start, int i_end)
     {
         int offset = (int)floor(window / 2.0);
@@ -288,7 +288,7 @@ The way local histogram equalization works is that we iterate through each pixel
             delete[] hist;
         }
     }
-
+```
 
 <a id="org1aaa0b7"></a>
 
@@ -324,7 +324,7 @@ Another way to address the problem we talked about earlier is to calculate the h
            │                                      │
            │                                      │
            └──────────────────────────────────────┘
-
+```cpp
     void SerialLHE::ApplyLHEWithInterpol(cv::Mat &base, cv::Mat img, int window)
     {
         std::map<std::tuple<int, int>, double *> all_luts;
@@ -415,7 +415,7 @@ Another way to address the problem we talked about earlier is to calculate the h
             delete[] it->second;
         }
     }
-
+```
 
 <a id="orga7ffda2"></a>
 
@@ -427,7 +427,7 @@ All we need to do is to divide the work between threads based on their IDs, as n
 <a id="orga94bea1"></a>
 
 ### Improved algorithm
-
+```cpp
     void ParallelLHE::ApplyLHE(cv::Mat &base, cv::Mat img, int window)
     {
     #pragma omp parallel
@@ -444,12 +444,12 @@ All we need to do is to divide the work between threads based on their IDs, as n
             ApplyLHEHelper(base, img, window, i_start, i_end);
         }
     }
-
+```
 
 <a id="org2d595a2"></a>
 
 ### Interpolating LHE
-
+```cpp
     void ParallelFastLHE::ApplyLHEWithInterpolation(cv::Mat &base, cv::Mat img, int window)
     {
         std::map<std::tuple<int, int>, double *> all_luts;
@@ -490,7 +490,7 @@ All we need to do is to divide the work between threads based on their IDs, as n
             delete[] it->second;
         }
     }
-
+```
 
 <a id="orgc15b8cf"></a>
 
@@ -502,21 +502,22 @@ All we need to do is to divide the work between threads based on their IDs, as n
 ## Cloning the project
 
 Opencv is one our project&rsquo;s dependencies, for a better experience and avoiding version related problems we have added a specific commit from opencv project to our project as a submodule, that&rsquo;s why we have to perform a recursive pull.
-
+``` bash
     git clone --recurse-submodules -j[your thread count] https://github.com/toorajtaraz/mpche.git
-
+``` 
 
 <a id="org841a2d0"></a>
 
 ## Building opencv
 
 All we need to do is to create a new directory called build, cd into it, have cmake to generate makefile(s) and finally make the whole project. You may want to enable specific features or backends too.
-
+``` bash
     cd mpche/submodules/opencv
     mkdir build
     cd build
     cmake [your flags] ..
     make -j[your thread count]
+```
 
 
 <a id="orgef000b6"></a>
@@ -524,13 +525,13 @@ All we need to do is to create a new directory called build, cd into it, have cm
 ## Building the project
 
 We have to do the same for our project too.
-
+``` bash
     cd mpche
     mkdir build
     cmake ..
     make -j[your thread count]
     ./bin/mpche [flags]
-
+```
 
 <a id="orgcd50772"></a>
 
