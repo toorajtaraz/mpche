@@ -9,7 +9,7 @@ include_directories( ${OpenMP_C_INCLUDE_DIRS} )
 
 set( NAME_SRC
   mpche.cpp
-  utils/ocv_wrappers.cpp
+  utils/HistogramHelper.cpp
   utils/SerialLHE.cpp
   utils/VideoCreator.cpp
   utils/ParallelLHE.cpp
@@ -17,7 +17,7 @@ set( NAME_SRC
 )
 
 set( NAME_HEADERS
-  headers/ocv_wrappers.h
+  headers/HistogramHelper.h
   headers/SerialLHE.h
   headers/VideoCreator.h
   headers/ParallelLHE.h
