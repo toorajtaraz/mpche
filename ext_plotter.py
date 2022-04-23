@@ -1,4 +1,6 @@
 from matplotlib import pyplot as plt
+import csv
+import numpy as np
 
 lines = open("/home/toorajtaraz/Documents/university/MP/projects/phase1/mpche/images/res.txt", "r").readlines()
 
@@ -12,6 +14,8 @@ for line in lines:
             continue
         conf.append(splited[i])
     configuration.append(conf)
+
+ 
 
 # print(configuration)
 configuration_280_187 = []
@@ -35,6 +39,17 @@ for conff in configuration:
         configuration_1960_1307.append(conf)
     elif conf[4] == 2520 and conf[5] == 1680:
         configuration_2520_1680.append(conf)
+
+file = open('/home/toorajtaraz/Documents/university/MP/projects/phase1/mpche/images/res.csv', 'w+', newline ='') 
+with file:     
+    write = csv.writer(file) 
+    write.writerows([['t_num', 'mode', 's_num', 'window', 'out_put_width', 'out_put_height', 'time_lapsed']])
+    write.writerows(configuration_280_187)
+    write.writerows(configuration_840_560)
+    write.writerows(configuration_1400_934)
+    write.writerows(configuration_1960_1307)
+    write.writerows(configuration_2520_1680)
+file.close()
 
 for i in range(1, 3):
     fig, ax = plt.subplots()
