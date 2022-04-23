@@ -6,7 +6,7 @@ class VideoCreator
 {
 
 public:
-    void create_video(const std::string &videoFilePath , std:: vector<cv::Mat> & images);
+void VideoCreator::videoHandlerPipeline(char* input_path, char* output_path, int color, int mode, int thread_num, int w);
 };
 
 #endif // VIDEO_CREATE_H_
