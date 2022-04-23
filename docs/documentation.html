@@ -1,0 +1,802 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2022-04-24 Sun 00:12 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Multi process LHE</title>
+<meta name="author" content="Tooraj Taraz" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<style type="text/css">
+/* Base */html,body {    background-color: #222;    min-height: 100%;    line-height: 1.5;}body {    color: #fafafa;    font-family: "Courier New";}::selection {    background-color:  #2ecc40;    color: white;}/* Responsive content positioning */@media only screen and (min-width: 1020px) /* Large screens */{    body{        padding: 10vh 25vw;    }}@media only screen and (max-width: 1020px) and (min-width: 750px) /* Small screens */{    body{        padding: 5vh 10vw;    }}@media only screen and (max-width: 750px) /* Small screens */{    body{        padding: 2vh 5vw;    }}/* Headers */h1{font-size: 2.5rem;}h2{font-size: 1.7rem;}h1 > .subtitle, h3, h4, h5, h6{font-size: 1.3rem;}.title{    margin-bottom: 2.5rem;}/* Padding & Margin */* {margin: 0; padding: 0;}pre, blockquote, ul, ol, p, table{    margin: 1rem 0;}h1, h2{margin-top: 2rem; line-height: 2rem;}h3, h4, h5, h6{margin-top: 1rem;}/* Links  */a, a:visited {    color: #01ff70;    text-decoration: underline;}a:hover, a:focus, a:active {    color: #2ecc40;}/* Code */pre {    font-family: "Courier New";    padding: .5rem;    background-color: #333;    padding: 0.5rem;    border-radius: 0.2rem;    font-size: 0.9rem;    color: #EEE;    overflow-x: auto;}.org-keyword{    color: #01ff70;}.org-rainbow-delimiters-depth-1{    color: #2ecc40;}.org-rainbow-delimiters-depth-2{    color: #01ff70;}/* Blockquotes */blockquote {    border-left: 3px solid #01ff70;    padding-left: 1rem;}li{    list-style-position: inside;}/* Tags */.tag{    margin-top: 0.5rem;    display: block;    color: white;    font-size: var(--font-size-xsmall);}.tag > span{		font-weight: 400;    font-size: 0.8rem;    background-color: #444;    text-transform: uppercase;    border-radius: 2px;    width: fit-content;    height: auto;    padding: 1px 5px;}/* Keywords */.todo{    color: #2ecc40;}.done{    color: #444;}/* Overflows */.outline-text-2, .outline-text-3, .outline-text-4{	  max-width: 100%;	  overflow-x: auto;}/* Table */tr:nth-child(even) {    background-color: #333;}th, td{    padding: 0.5rem;    text-align: center;}.underline{    text-decoration: underline;}img{    max-width: 100%;    height: auto;}
+</style>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Multi process LHE</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org60d2ab1">1. Classes</a>
+<ul>
+<li><a href="#org4761e59">1.1. Handling video stream</a></li>
+<li><a href="#orgbd5b6f3">1.2. Serial implementation</a>
+<ul>
+<li><a href="#org97b9840">1.2.1. Improved algorithm minus interpolation</a></li>
+<li><a href="#org68e54e1">1.2.2. Interpolating implementation</a></li>
+</ul>
+</li>
+<li><a href="#orgcb0dfc3">1.3. Parallel implementation</a>
+<ul>
+<li><a href="#orgbb69178">1.3.1. Improved algorithm</a></li>
+<li><a href="#org2d53a9c">1.3.2. Interpolating LHE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org5e08815">2. Build guide</a>
+<ul>
+<li><a href="#orgaabb76b">2.1. Cloning the project</a></li>
+<li><a href="#org65df857">2.2. Building opencv</a></li>
+<li><a href="#orgc62bae4">2.3. Building the project</a></li>
+<li><a href="#org6e74d81">2.4. Using the command line interface</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org60d2ab1" class="outline-2">
+<h2 id="org60d2ab1"><span class="section-number-2">1.</span> Classes</h2>
+<div class="outline-text-2" id="text-1">
+<ol class="org-ol">
+<li>VideoCreator: Handling video stream input and output.</li>
+<li>SerialLHE: Handles serial implementation of local histogram equalization.</li>
+<li>ParallelLHE: Handles parallel implementation of improved version local histogram equalization without interpolation.</li>
+<li>ParallelFastLHE: Handles parallel implementation of interpolated histogram equalization.</li>
+<li>HistogramHelper(NOT A CLASS): Implements utilities for calculating histogram in a window and generate look up table.</li>
+</ol>
+</div>
+<div id="outline-container-org4761e59" class="outline-3">
+<h3 id="org4761e59"><span class="section-number-3">1.1.</span> Handling video stream</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+We simply iterate over frames of input stream and write each manipulated frame to output stream. The iteration for is simply a omp for block and reading the frames and writing them are critical sections. Here we can see the main loop:
+</p>
+<div class="org-src-container">
+<pre class="src src-c++"><span style="color: #86e1fc; font-weight: bold;">#pragma</span> omp parallel num_threads<span style="color: #c099ff;">(</span>thread_num<span style="color: #c099ff;">)</span>
+        <span style="color: #c099ff;">{</span>
+<span style="color: #86e1fc; font-weight: bold;">#pragma</span> omp <span style="color: #c099ff;">for</span>
+            <span style="color: #c099ff;">for</span> <span style="color: #ff995e;">(</span><span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">frame_num</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; frame_num &lt; frame_count; frame_num++<span style="color: #ff995e;">)</span>
+            <span style="color: #ff995e;">{</span>
+                <span style="color: #ff995e;">cv</span>::<span style="color: #ffc777;">Mat</span> <span style="color: #ff98a4;">img</span>;
+<span style="color: #86e1fc; font-weight: bold;">#pragma</span> omp critical
+                <span style="color: #ff98a4;">{</span>
+                    cap &gt;&gt; img;
+                <span style="color: #ff98a4;">}</span>
+                <span style="color: #7a88cf;">//</span><span style="color: #7a88cf;">Processing the frame</span>
+<span style="color: #86e1fc; font-weight: bold;">#pragma</span> omp critical
+                <span style="color: #ff98a4;">{</span>
+                    writer &lt;&lt; out;
+                <span style="color: #ff98a4;">}</span>
+            <span style="color: #ff995e;">}</span>
+        <span style="color: #c099ff;">}</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgbd5b6f3" class="outline-3">
+<h3 id="orgbd5b6f3"><span class="section-number-3">1.2.</span> Serial implementation</h3>
+<div class="outline-text-3" id="text-1-2">
+</div>
+<div id="outline-container-org97b9840" class="outline-4">
+<h4 id="org97b9840"><span class="section-number-4">1.2.1.</span> Improved algorithm minus interpolation</h4>
+<div class="outline-text-4" id="text-1-2-1">
+<p>
+The way local histogram equalization works is that we iterate through each pixel in the picture and calculate the histogram for a window centered on that pixel and find the equalized value based on that. Problem with this approach is that every window overlaps with the next window and almost all of it is the same and it doesn&rsquo;t make sense to calculate things over and over again. What we can do is to only calculate the difference between each overlapping window, if we move the window from left to right till the end and then move it down and then move it from right to left we will do the minimum amount of calculation. Alternating the direction we move the window is the key to our problem. Here we can see a simple diagram of the algorithm:
+</p>
+<pre class="example">
+ ─────────►
+
+┌┬───────┬┐ ┌────────┐               ┌────────┐ │
+││       ││ │        │   x  x  x     │        │ │
+││  ┌────┼┼─┼────────┼───────────────┼─────┬──┤ │
+││  │    ││ │        │               │     │  │ │
+││  │    ││ │        │               │     │  │ │
+└┴──┼────┴┘ └────────┘               ├─────┼──┤ ▼
+    │                                └─────┼──┘
+    │                                      │
+    │                             ◄────────┼─────
+    │                                      │
+    │                                      │
+    │                                      │
+    │                                      │
+    │                                      │
+    │                                      │
+    │                                      │
+    │                                      │
+    │                                      │
+    │                                      │
+    │                                      │
+    │                                      │
+    │                                      │
+    │                                      │
+    │                                      │
+    └──────────────────────────────────────┘
+</pre>
+<div class="org-src-container">
+<pre class="src src-c++"><span style="color: #ffc777;">void</span> <span style="color: #ff995e;">ParallelLHE</span>::<span style="color: #82aaff;">ApplyLHEHelper</span><span style="color: #c099ff;">(</span><span style="color: #ff995e;">cv</span>::<span style="color: #ffc777;">Mat</span> &amp;<span style="color: #ff98a4;">base</span>, <span style="color: #ff995e;">cv</span>::<span style="color: #ffc777;">Mat</span> <span style="color: #ff98a4;">img</span>, <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">window</span>, <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">i_start</span>, <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">i_end</span><span style="color: #c099ff;">)</span>
+<span style="color: #c099ff;">{</span>
+    <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">offset</span> = <span style="color: #ff995e;">(</span><span style="color: #ffc777;">int</span><span style="color: #ff995e;">)</span>floor<span style="color: #ff995e;">(</span>window / <span style="color: #ff995e; font-weight: bold;">2.0</span><span style="color: #ff995e;">)</span>;
+    <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">height</span> = img.size<span style="color: #ff995e;">()</span>.height;
+    <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">width</span> = img.size<span style="color: #ff995e;">()</span>.width;
+    <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">count</span> = <span style="color: #ff995e; font-weight: bold;">0</span>;
+    <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">sw</span> = <span style="color: #ff995e; font-weight: bold;">0</span>;
+    <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">channels</span> = img.channels<span style="color: #ff995e;">()</span>;
+    <span style="color: #ffc777;">int</span> **<span style="color: #ff98a4;">hists</span>;
+    <span style="color: #ffc777;">int</span> *<span style="color: #ff98a4;">hist</span>;
+    <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">temp</span>;
+    <span style="color: #c099ff;">if</span> <span style="color: #ff995e;">(</span>channels &gt; <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #ff995e;">)</span>
+    <span style="color: #ff995e;">{</span>
+        hists = <span style="color: #c099ff;">new</span> <span style="color: #ffc777;">int</span> *<span style="color: #ff98a4;">[</span><span style="color: #ff995e;">channels</span><span style="color: #ff98a4;">]</span>;
+        <span style="color: #c099ff;">for</span> <span style="color: #ff98a4;">(</span><span style="color: #c099ff;">auto</span> <span style="color: #ff98a4;">i</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; i &lt; channels; i++<span style="color: #ff98a4;">)</span>
+        <span style="color: #ff98a4;">{</span>
+            hists<span style="color: #b4f9f8;">[</span>i<span style="color: #b4f9f8;">]</span> = <span style="color: #c099ff;">new</span> <span style="color: #ffc777;">int</span><span style="color: #b4f9f8;">[</span><span style="color: #ff995e;">PIXEL_RANGE</span><span style="color: #b4f9f8;">]()</span>;
+        <span style="color: #ff98a4;">}</span>
+    <span style="color: #ff995e;">}</span>
+    <span style="color: #c099ff;">else</span>
+    <span style="color: #ff995e;">{</span>
+        hist = <span style="color: #c099ff;">new</span> <span style="color: #ffc777;">int</span><span style="color: #ff98a4;">[</span><span style="color: #ff995e;">PIXEL_RANGE</span><span style="color: #ff98a4;">]()</span>;
+    <span style="color: #ff995e;">}</span>
+    <span style="color: #c099ff;">for</span> <span style="color: #ff995e;">(</span><span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">i</span> = i_start; i &lt; i_end; i++<span style="color: #ff995e;">)</span>
+    <span style="color: #ff995e;">{</span>
+        sw = i % <span style="color: #ff995e; font-weight: bold;">2</span> == <span style="color: #ff98a4;">(</span>i_start % <span style="color: #ff995e; font-weight: bold;">2</span><span style="color: #ff98a4;">)</span> ? <span style="color: #ff995e; font-weight: bold;">0</span> : <span style="color: #ff995e; font-weight: bold;">1</span>;
+        <span style="color: #c099ff;">if</span> <span style="color: #ff98a4;">(</span>sw == <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #ff98a4;">)</span>
+        <span style="color: #ff98a4;">{</span>
+            <span style="color: #c099ff;">for</span> <span style="color: #b4f9f8;">(</span><span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">j</span> = width - <span style="color: #ff995e; font-weight: bold;">1</span>; j &gt;= <span style="color: #ff995e; font-weight: bold;">0</span>; j--<span style="color: #b4f9f8;">)</span>
+            <span style="color: #b4f9f8;">{</span>
+                <span style="color: #c099ff;">if</span> <span style="color: #c099ff;">(</span>j == <span style="color: #ff995e;">(</span>width - <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #ff995e;">)</span><span style="color: #c099ff;">)</span>
+                <span style="color: #c099ff;">{</span>
+                    <span style="color: #c099ff;">for</span> <span style="color: #ff995e;">(</span><span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">n</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; n &lt; window; n++<span style="color: #ff995e;">)</span>
+                    <span style="color: #ff995e;">{</span>
+                        <span style="color: #c099ff;">if</span> <span style="color: #ff98a4;">(</span>channels &gt; <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #ff98a4;">)</span>
+                        <span style="color: #ff98a4;">{</span>
+                            <span style="color: #c099ff;">for</span> <span style="color: #b4f9f8;">(</span><span style="color: #c099ff;">auto</span> <span style="color: #ff98a4;">k</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; k &lt; channels; k++<span style="color: #b4f9f8;">)</span>
+                            <span style="color: #b4f9f8;">{</span>
+                                temp = count;
+                                ExtractHistogramRGB<span style="color: #c099ff;">(</span>img, &amp;temp, i - <span style="color: #ff995e; font-weight: bold;">1</span> - offset, i - <span style="color: #ff995e; font-weight: bold;">1</span> - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, j + n - offset, j + n - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, k, hists<span style="color: #ff995e;">[</span>k<span style="color: #ff995e;">]</span>, -<span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #c099ff;">)</span>;
+                                ExtractHistogramRGB<span style="color: #c099ff;">(</span>img, &amp;temp, i + window - <span style="color: #ff995e; font-weight: bold;">1</span> - offset, i + window - <span style="color: #ff995e; font-weight: bold;">1</span> - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, j + n - offset, j + n - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, k, hists<span style="color: #ff995e;">[</span>k<span style="color: #ff995e;">]</span>, <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #c099ff;">)</span>;
+                            <span style="color: #b4f9f8;">}</span>
+                            count = temp;
+                        <span style="color: #ff98a4;">}</span>
+                        <span style="color: #c099ff;">else</span>
+                        <span style="color: #ff98a4;">{</span>
+                            ExtractHistogram<span style="color: #b4f9f8;">(</span>img, &amp;count, i - <span style="color: #ff995e; font-weight: bold;">1</span> - offset, i - <span style="color: #ff995e; font-weight: bold;">1</span> - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, j + n - offset, j + n - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, hist, -<span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #b4f9f8;">)</span>;
+                            ExtractHistogram<span style="color: #b4f9f8;">(</span>img, &amp;count, i + window - <span style="color: #ff995e; font-weight: bold;">1</span> - offset, i + window - <span style="color: #ff995e; font-weight: bold;">1</span> - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, j + n - offset, j + n - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, hist, <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #b4f9f8;">)</span>;
+                        <span style="color: #ff98a4;">}</span>
+                    <span style="color: #ff995e;">}</span>
+                <span style="color: #c099ff;">}</span>
+                <span style="color: #c099ff;">else</span> <span style="color: #c099ff;">if</span> <span style="color: #c099ff;">(</span>j &lt; <span style="color: #ff995e;">(</span>width - <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #ff995e;">)</span><span style="color: #c099ff;">)</span>
+                <span style="color: #c099ff;">{</span>
+                    <span style="color: #c099ff;">for</span> <span style="color: #ff995e;">(</span><span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">n</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; n &lt; window; n++<span style="color: #ff995e;">)</span>
+                    <span style="color: #ff995e;">{</span>
+                        <span style="color: #c099ff;">if</span> <span style="color: #ff98a4;">(</span>channels &gt; <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #ff98a4;">)</span>
+                        <span style="color: #ff98a4;">{</span>
+                            <span style="color: #c099ff;">for</span> <span style="color: #b4f9f8;">(</span><span style="color: #c099ff;">auto</span> <span style="color: #ff98a4;">k</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; k &lt; channels; k++<span style="color: #b4f9f8;">)</span>
+                            <span style="color: #b4f9f8;">{</span>
+                                temp = count;
+                                ExtractHistogramRGB<span style="color: #c099ff;">(</span>img, &amp;temp, i + n - offset, i + n - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, j - offset, j - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, k, hists<span style="color: #ff995e;">[</span>k<span style="color: #ff995e;">]</span>, <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #c099ff;">)</span>;
+                                ExtractHistogramRGB<span style="color: #c099ff;">(</span>img, &amp;temp, i + n - offset, i + n - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, j + window - offset, j + window - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, k, hists<span style="color: #ff995e;">[</span>k<span style="color: #ff995e;">]</span>, -<span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #c099ff;">)</span>;
+                            <span style="color: #b4f9f8;">}</span>
+                            count = temp;
+                        <span style="color: #ff98a4;">}</span>
+                        <span style="color: #c099ff;">else</span>
+                        <span style="color: #ff98a4;">{</span>
+                            ExtractHistogram<span style="color: #b4f9f8;">(</span>img, &amp;count, i + n - offset, i + n - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, j - offset, j - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, hist, <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #b4f9f8;">)</span>;
+                            ExtractHistogram<span style="color: #b4f9f8;">(</span>img, &amp;count, i + n - offset, i + n - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, j + window - offset, j + window - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, hist, -<span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #b4f9f8;">)</span>;
+                        <span style="color: #ff98a4;">}</span>
+                    <span style="color: #ff995e;">}</span>
+                <span style="color: #c099ff;">}</span>
+                count = count &gt; <span style="color: #ff995e; font-weight: bold;">0</span> ? count : <span style="color: #ff995e; font-weight: bold;">1</span>;
+                <span style="color: #c099ff;">if</span> <span style="color: #c099ff;">(</span>channels &gt; <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #c099ff;">)</span>
+                <span style="color: #c099ff;">{</span>
+                    <span style="color: #ffc777;">double</span> *<span style="color: #ff98a4;">lut</span> = BuildLookUpTableRGB<span style="color: #ff995e;">(</span>hists<span style="color: #ff98a4;">[</span><span style="color: #ff995e; font-weight: bold;">0</span><span style="color: #ff98a4;">]</span>, hists<span style="color: #ff98a4;">[</span><span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #ff98a4;">]</span>, hists<span style="color: #ff98a4;">[</span><span style="color: #ff995e; font-weight: bold;">2</span><span style="color: #ff98a4;">]</span>, count, <span style="color: #ff995e;">true</span><span style="color: #ff995e;">)</span>;
+                    <span style="color: #c099ff;">for</span> <span style="color: #ff995e;">(</span><span style="color: #c099ff;">auto</span> <span style="color: #ff98a4;">k</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; k &lt; channels; k++<span style="color: #ff995e;">)</span>
+                    <span style="color: #ff995e;">{</span>
+                        base.at<span style="color: #ff98a4;">&lt;</span><span style="color: #ff995e;">cv</span>::Vec3b<span style="color: #ff98a4;">&gt;(</span>i, j<span style="color: #ff98a4;">)[</span>k<span style="color: #ff98a4;">]</span> = <span style="color: #ff98a4;">(</span><span style="color: #ffc777;">uchar</span><span style="color: #ff98a4;">)</span>lut<span style="color: #ff98a4;">[</span>img.at<span style="color: #b4f9f8;">&lt;</span><span style="color: #ff995e;">cv</span>::Vec3b<span style="color: #b4f9f8;">&gt;(</span>i, j<span style="color: #b4f9f8;">)[</span>k<span style="color: #b4f9f8;">]</span><span style="color: #ff98a4;">]</span>;
+                    <span style="color: #ff995e;">}</span>
+                    <span style="color: #c099ff;">delete</span><span style="color: #ff995e;">[]</span> lut;
+                <span style="color: #c099ff;">}</span>
+                <span style="color: #c099ff;">else</span>
+                <span style="color: #c099ff;">{</span>
+                    <span style="color: #ffc777;">double</span> *<span style="color: #ff98a4;">prob</span> = CalculateProbability<span style="color: #ff995e;">(</span>hist, count<span style="color: #ff995e;">)</span>;
+                    <span style="color: #ffc777;">double</span> *<span style="color: #ff98a4;">lut</span> = BuildLookUpTable<span style="color: #ff995e;">(</span>prob<span style="color: #ff995e;">)</span>;
+                    base.at<span style="color: #ff995e;">&lt;</span><span style="color: #ffc777;">uchar</span><span style="color: #ff995e;">&gt;(</span>i, j<span style="color: #ff995e;">)</span> = <span style="color: #ff995e;">(</span><span style="color: #ffc777;">int</span><span style="color: #ff995e;">)</span>floor<span style="color: #ff995e;">(</span>lut<span style="color: #ff98a4;">[</span>img.at<span style="color: #b4f9f8;">&lt;</span><span style="color: #ffc777;">uchar</span><span style="color: #b4f9f8;">&gt;(</span>i, j<span style="color: #b4f9f8;">)</span><span style="color: #ff98a4;">]</span><span style="color: #ff995e;">)</span>;
+                    <span style="color: #7a88cf;">// </span><span style="color: #7a88cf;">Clean memory</span>
+                    <span style="color: #c099ff;">delete</span><span style="color: #ff995e;">[]</span> prob;
+                    <span style="color: #c099ff;">delete</span><span style="color: #ff995e;">[]</span> lut;
+                <span style="color: #c099ff;">}</span>
+            <span style="color: #b4f9f8;">}</span>
+        <span style="color: #ff98a4;">}</span>
+        <span style="color: #c099ff;">else</span>
+        <span style="color: #ff98a4;">{</span>
+            <span style="color: #c099ff;">for</span> <span style="color: #b4f9f8;">(</span><span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">j</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; j &lt; width; j++<span style="color: #b4f9f8;">)</span>
+            <span style="color: #b4f9f8;">{</span>
+                <span style="color: #c099ff;">if</span> <span style="color: #c099ff;">(</span>j == <span style="color: #ff995e; font-weight: bold;">0</span> &amp;&amp; i &gt; i_start<span style="color: #c099ff;">)</span>
+                <span style="color: #c099ff;">{</span>
+                    <span style="color: #c099ff;">for</span> <span style="color: #ff995e;">(</span><span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">n</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; n &lt; window; n++<span style="color: #ff995e;">)</span>
+                    <span style="color: #ff995e;">{</span>
+                        <span style="color: #c099ff;">if</span> <span style="color: #ff98a4;">(</span>channels &gt; <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #ff98a4;">)</span>
+                        <span style="color: #ff98a4;">{</span>
+                            <span style="color: #c099ff;">for</span> <span style="color: #b4f9f8;">(</span><span style="color: #c099ff;">auto</span> <span style="color: #ff98a4;">k</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; k &lt; channels; k++<span style="color: #b4f9f8;">)</span>
+                            <span style="color: #b4f9f8;">{</span>
+                                temp = count;
+                                ExtractHistogramRGB<span style="color: #c099ff;">(</span>img, &amp;temp, i - <span style="color: #ff995e; font-weight: bold;">1</span> - offset, i - <span style="color: #ff995e; font-weight: bold;">1</span> - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, j + n - offset, j + n - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, k, hists<span style="color: #ff995e;">[</span>k<span style="color: #ff995e;">]</span>, -<span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #c099ff;">)</span>;
+                                ExtractHistogramRGB<span style="color: #c099ff;">(</span>img, &amp;temp, i + window - <span style="color: #ff995e; font-weight: bold;">1</span> - offset, i + window - <span style="color: #ff995e; font-weight: bold;">1</span> - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, j + n - offset, j + n - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, k, hists<span style="color: #ff995e;">[</span>k<span style="color: #ff995e;">]</span>, <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #c099ff;">)</span>;
+                            <span style="color: #b4f9f8;">}</span>
+                            count = temp;
+                        <span style="color: #ff98a4;">}</span>
+                        <span style="color: #c099ff;">else</span>
+                        <span style="color: #ff98a4;">{</span>
+                            ExtractHistogram<span style="color: #b4f9f8;">(</span>img, &amp;count, i - <span style="color: #ff995e; font-weight: bold;">1</span> - offset, i - <span style="color: #ff995e; font-weight: bold;">1</span> - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, j + n - offset, j + n - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, hist, -<span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #b4f9f8;">)</span>;
+                            ExtractHistogram<span style="color: #b4f9f8;">(</span>img, &amp;count, i + window - <span style="color: #ff995e; font-weight: bold;">1</span> - offset, i + window - <span style="color: #ff995e; font-weight: bold;">1</span> - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, j + n - offset, j + n - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, hist, <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #b4f9f8;">)</span>;
+                        <span style="color: #ff98a4;">}</span>
+                    <span style="color: #ff995e;">}</span>
+                <span style="color: #c099ff;">}</span>
+                <span style="color: #c099ff;">else</span> <span style="color: #c099ff;">if</span> <span style="color: #c099ff;">(</span>j == <span style="color: #ff995e; font-weight: bold;">0</span> &amp;&amp; i == i_start<span style="color: #c099ff;">)</span>
+                <span style="color: #c099ff;">{</span>
+                    <span style="color: #c099ff;">for</span> <span style="color: #ff995e;">(</span><span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">n</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; n &lt; window; n++<span style="color: #ff995e;">)</span>
+                    <span style="color: #ff995e;">{</span>
+                        <span style="color: #c099ff;">for</span> <span style="color: #ff98a4;">(</span><span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">m</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; m &lt; window; m++<span style="color: #ff98a4;">)</span>
+                        <span style="color: #ff98a4;">{</span>
+                            <span style="color: #c099ff;">if</span> <span style="color: #b4f9f8;">(</span>channels &gt; <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #b4f9f8;">)</span>
+                            <span style="color: #b4f9f8;">{</span>
+                                <span style="color: #c099ff;">for</span> <span style="color: #c099ff;">(</span><span style="color: #c099ff;">auto</span> <span style="color: #ff98a4;">k</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; k &lt; channels; k++<span style="color: #c099ff;">)</span>
+                                <span style="color: #c099ff;">{</span>
+                                    temp = count;
+                                    ExtractHistogramRGB<span style="color: #ff995e;">(</span>img, &amp;temp, i + n - offset, i + n - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, j + m - offset, j + m - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, k, hists<span style="color: #ff98a4;">[</span>k<span style="color: #ff98a4;">]</span>, <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #ff995e;">)</span>;
+                                <span style="color: #c099ff;">}</span>
+                                count = temp;
+                            <span style="color: #b4f9f8;">}</span>
+                            <span style="color: #c099ff;">else</span>
+                            <span style="color: #b4f9f8;">{</span>
+                                ExtractHistogram<span style="color: #c099ff;">(</span>img, &amp;count, i + n - offset, i + n - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, j + m - offset, j + m - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, hist, <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #c099ff;">)</span>;
+                            <span style="color: #b4f9f8;">}</span>
+                        <span style="color: #ff98a4;">}</span>
+                    <span style="color: #ff995e;">}</span>
+                <span style="color: #c099ff;">}</span>
+                <span style="color: #c099ff;">else</span> <span style="color: #c099ff;">if</span> <span style="color: #c099ff;">(</span>j &gt; <span style="color: #ff995e; font-weight: bold;">0</span><span style="color: #c099ff;">)</span>
+                <span style="color: #c099ff;">{</span>
+                    <span style="color: #c099ff;">for</span> <span style="color: #ff995e;">(</span><span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">n</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; n &lt; window; n++<span style="color: #ff995e;">)</span>
+                    <span style="color: #ff995e;">{</span>
+                        <span style="color: #c099ff;">if</span> <span style="color: #ff98a4;">(</span>channels &gt; <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #ff98a4;">)</span>
+                        <span style="color: #ff98a4;">{</span>
+                            <span style="color: #c099ff;">for</span> <span style="color: #b4f9f8;">(</span><span style="color: #c099ff;">auto</span> <span style="color: #ff98a4;">k</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; k &lt; channels; k++<span style="color: #b4f9f8;">)</span>
+                            <span style="color: #b4f9f8;">{</span>
+                                temp = count;
+                                ExtractHistogramRGB<span style="color: #c099ff;">(</span>img, &amp;temp, i + n - offset, i + n - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, j - <span style="color: #ff995e; font-weight: bold;">1</span> - offset, j - <span style="color: #ff995e; font-weight: bold;">1</span> - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, k, hists<span style="color: #ff995e;">[</span>k<span style="color: #ff995e;">]</span>, -<span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #c099ff;">)</span>;
+                                ExtractHistogramRGB<span style="color: #c099ff;">(</span>img, &amp;temp, i + n - offset, i + n - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, j + window - <span style="color: #ff995e; font-weight: bold;">1</span> - offset, j + window - <span style="color: #ff995e; font-weight: bold;">1</span> - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, k, hists<span style="color: #ff995e;">[</span>k<span style="color: #ff995e;">]</span>, <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #c099ff;">)</span>;
+                            <span style="color: #b4f9f8;">}</span>
+                            count = temp;
+                        <span style="color: #ff98a4;">}</span>
+                        <span style="color: #c099ff;">else</span>
+                        <span style="color: #ff98a4;">{</span>
+                            ExtractHistogram<span style="color: #b4f9f8;">(</span>img, &amp;count, i + n - offset, i + n - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, j - <span style="color: #ff995e; font-weight: bold;">1</span> - offset, j - <span style="color: #ff995e; font-weight: bold;">1</span> - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, hist, -<span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #b4f9f8;">)</span>;
+                            ExtractHistogram<span style="color: #b4f9f8;">(</span>img, &amp;count, i + n - offset, i + n - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, j + window - <span style="color: #ff995e; font-weight: bold;">1</span> - offset, j + window - <span style="color: #ff995e; font-weight: bold;">1</span> - offset + <span style="color: #ff995e; font-weight: bold;">1</span>, hist, <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #b4f9f8;">)</span>;
+                        <span style="color: #ff98a4;">}</span>
+                    <span style="color: #ff995e;">}</span>
+                <span style="color: #c099ff;">}</span>
+                count = count &gt; <span style="color: #ff995e; font-weight: bold;">0</span> ? count : <span style="color: #ff995e; font-weight: bold;">1</span>;
+                <span style="color: #c099ff;">if</span> <span style="color: #c099ff;">(</span>channels &gt; <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #c099ff;">)</span>
+                <span style="color: #c099ff;">{</span>
+                    <span style="color: #ffc777;">double</span> *<span style="color: #ff98a4;">lut</span> = BuildLookUpTableRGB<span style="color: #ff995e;">(</span>hists<span style="color: #ff98a4;">[</span><span style="color: #ff995e; font-weight: bold;">0</span><span style="color: #ff98a4;">]</span>, hists<span style="color: #ff98a4;">[</span><span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #ff98a4;">]</span>, hists<span style="color: #ff98a4;">[</span><span style="color: #ff995e; font-weight: bold;">2</span><span style="color: #ff98a4;">]</span>, count, <span style="color: #ff995e;">true</span><span style="color: #ff995e;">)</span>;
+                    <span style="color: #c099ff;">for</span> <span style="color: #ff995e;">(</span><span style="color: #c099ff;">auto</span> <span style="color: #ff98a4;">k</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; k &lt; channels; k++<span style="color: #ff995e;">)</span>
+                    <span style="color: #ff995e;">{</span>
+                        base.at<span style="color: #ff98a4;">&lt;</span><span style="color: #ff995e;">cv</span>::Vec3b<span style="color: #ff98a4;">&gt;(</span>i, j<span style="color: #ff98a4;">)[</span>k<span style="color: #ff98a4;">]</span> = <span style="color: #ff98a4;">(</span><span style="color: #ffc777;">uchar</span><span style="color: #ff98a4;">)</span>lut<span style="color: #ff98a4;">[</span>img.at<span style="color: #b4f9f8;">&lt;</span><span style="color: #ff995e;">cv</span>::Vec3b<span style="color: #b4f9f8;">&gt;(</span>i, j<span style="color: #b4f9f8;">)[</span>k<span style="color: #b4f9f8;">]</span><span style="color: #ff98a4;">]</span>;
+                    <span style="color: #ff995e;">}</span>
+                    <span style="color: #c099ff;">delete</span><span style="color: #ff995e;">[]</span> lut;
+                <span style="color: #c099ff;">}</span>
+                <span style="color: #c099ff;">else</span>
+                <span style="color: #c099ff;">{</span>
+                    <span style="color: #ffc777;">double</span> *<span style="color: #ff98a4;">prob</span> = CalculateProbability<span style="color: #ff995e;">(</span>hist, count<span style="color: #ff995e;">)</span>;
+                    <span style="color: #ffc777;">double</span> *<span style="color: #ff98a4;">lut</span> = BuildLookUpTable<span style="color: #ff995e;">(</span>prob<span style="color: #ff995e;">)</span>;
+                    base.at<span style="color: #ff995e;">&lt;</span><span style="color: #ffc777;">uchar</span><span style="color: #ff995e;">&gt;(</span>i, j<span style="color: #ff995e;">)</span> = <span style="color: #ff995e;">(</span><span style="color: #ffc777;">int</span><span style="color: #ff995e;">)</span>floor<span style="color: #ff995e;">(</span>lut<span style="color: #ff98a4;">[</span>img.at<span style="color: #b4f9f8;">&lt;</span><span style="color: #ffc777;">uchar</span><span style="color: #b4f9f8;">&gt;(</span>i, j<span style="color: #b4f9f8;">)</span><span style="color: #ff98a4;">]</span><span style="color: #ff995e;">)</span>;
+                    <span style="color: #7a88cf;">// </span><span style="color: #7a88cf;">Clean memory</span>
+                    <span style="color: #c099ff;">delete</span><span style="color: #ff995e;">[]</span> prob;
+                    <span style="color: #c099ff;">delete</span><span style="color: #ff995e;">[]</span> lut;
+                <span style="color: #c099ff;">}</span>
+            <span style="color: #b4f9f8;">}</span>
+        <span style="color: #ff98a4;">}</span>
+    <span style="color: #ff995e;">}</span>
+    <span style="color: #c099ff;">if</span> <span style="color: #ff995e;">(</span>channels &gt; <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #ff995e;">)</span>
+    <span style="color: #ff995e;">{</span>
+        <span style="color: #7a88cf;">// </span><span style="color: #7a88cf;">delete channels</span>
+        <span style="color: #c099ff;">for</span> <span style="color: #ff98a4;">(</span><span style="color: #c099ff;">auto</span> <span style="color: #ff98a4;">k</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; k &lt; channels; k++<span style="color: #ff98a4;">)</span>
+        <span style="color: #ff98a4;">{</span>
+            <span style="color: #c099ff;">delete</span><span style="color: #b4f9f8;">[]</span> hists<span style="color: #b4f9f8;">[</span>k<span style="color: #b4f9f8;">]</span>;
+        <span style="color: #ff98a4;">}</span>
+    <span style="color: #ff995e;">}</span>
+    <span style="color: #c099ff;">else</span>
+    <span style="color: #ff995e;">{</span>
+        <span style="color: #c099ff;">delete</span><span style="color: #ff98a4;">[]</span> hist;
+    <span style="color: #ff995e;">}</span>
+<span style="color: #c099ff;">}</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org68e54e1" class="outline-4">
+<h4 id="org68e54e1"><span class="section-number-4">1.2.2.</span> Interpolating implementation</h4>
+<div class="outline-text-4" id="text-1-2-2">
+<p>
+Another way to address the problem we talked about earlier is to calculate the histogram around some of the pixels and use interpolation to calculate the mapped value for pixels with no window around them, Using this method we can get pretty good performance even in a single threaded mode. We also can calculate all the look up table before hand and store them in a hashtable, this method is known as dynamic programming.
+</p>
+<pre class="example">
+      ─────────► ◄──────────
+
+  ┌───────────┐    ┌───────────┐
+  │           │    │           │
+  │           │    │           │
+  │    ┌──────┼────┼───────────┼──────────────┐
+│ │    │x     │    │     x     │              │
+│ │    │      │    │           │              │
+│ │    │      │    │           │              │
+│ └────┼──────┘    └───────────┘              │
+▼      │        x                             │
+  ┌────┼──────┐    ┌────────────┐             │
+▲ │    │      │    │            │             │
+│ │    │      │    │            │             │
+│ │    │      │    │            │             │
+│ │    │x     │    │     x      │             │
+  │    │      │    │            │             │
+  │    │      │    │            │             │
+  └────┼──────┘    └────────────┘             │
+       │                                      │
+       │                                      │
+       │                                      │
+       │                                      │
+       │                                      │
+       │                                      │
+       │                                      │
+       │                                      │
+       └──────────────────────────────────────┘
+</pre>
+<div class="org-src-container">
+<pre class="src src-c++"><span style="color: #ffc777;">void</span> <span style="color: #ff995e;">SerialLHE</span>::<span style="color: #82aaff;">ApplyLHEWithInterpol</span><span style="color: #c099ff;">(</span><span style="color: #ff995e;">cv</span>::<span style="color: #ffc777;">Mat</span> &amp;<span style="color: #ff98a4;">base</span>, <span style="color: #ff995e;">cv</span>::<span style="color: #ffc777;">Mat</span> <span style="color: #ff98a4;">img</span>, <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">window</span><span style="color: #c099ff;">)</span>
+<span style="color: #c099ff;">{</span>
+    <span style="color: #ff995e;">std</span>::<span style="color: #ffc777;">map</span><span style="color: #ff995e;">&lt;</span><span style="color: #ff995e;">std</span>::<span style="color: #ffc777;">tuple</span><span style="color: #ff98a4;">&lt;</span><span style="color: #ffc777;">int</span>, <span style="color: #ffc777;">int</span><span style="color: #ff98a4;">&gt;</span>, <span style="color: #ffc777;">double</span> *<span style="color: #ff995e;">&gt;</span> <span style="color: #ff98a4;">all_luts</span>;
+    <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">offset</span> = <span style="color: #ff995e;">(</span><span style="color: #ffc777;">int</span><span style="color: #ff995e;">)</span>floor<span style="color: #ff995e;">(</span>window / <span style="color: #ff995e; font-weight: bold;">2.0</span><span style="color: #ff995e;">)</span>;
+    <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">height</span> = img.size<span style="color: #ff995e;">()</span>.height;
+    <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">width</span> = img.size<span style="color: #ff995e;">()</span>.width;
+    <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">max_i</span> = height + <span style="color: #ff995e;">(</span><span style="color: #ff98a4;">(</span><span style="color: #ffc777;">int</span><span style="color: #ff98a4;">)</span>floor<span style="color: #ff98a4;">(</span>window / <span style="color: #ff995e; font-weight: bold;">2.0</span><span style="color: #ff98a4;">)</span> - <span style="color: #ff98a4;">(</span>height % <span style="color: #b4f9f8;">(</span><span style="color: #ffc777;">int</span><span style="color: #b4f9f8;">)</span>floor<span style="color: #b4f9f8;">(</span>window / <span style="color: #ff995e; font-weight: bold;">2.0</span><span style="color: #b4f9f8;">)</span><span style="color: #ff98a4;">)</span><span style="color: #ff995e;">)</span>;
+    <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">max_j</span> = width + <span style="color: #ff995e;">(</span><span style="color: #ff98a4;">(</span><span style="color: #ffc777;">int</span><span style="color: #ff98a4;">)</span>floor<span style="color: #ff98a4;">(</span>window / <span style="color: #ff995e; font-weight: bold;">2.0</span><span style="color: #ff98a4;">)</span> - <span style="color: #ff98a4;">(</span>width % <span style="color: #b4f9f8;">(</span><span style="color: #ffc777;">int</span><span style="color: #b4f9f8;">)</span>floor<span style="color: #b4f9f8;">(</span>window / <span style="color: #ff995e; font-weight: bold;">2.0</span><span style="color: #b4f9f8;">)</span><span style="color: #ff98a4;">)</span><span style="color: #ff995e;">)</span>;
+    <span style="color: #7a88cf;">// </span><span style="color: #7a88cf;">get number of channels</span>
+    <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">channels</span> = img.channels<span style="color: #ff995e;">()</span>;
+    <span style="color: #ff995e;">std</span>::cout &lt;&lt; <span style="color: #c3e88d;">"channels = "</span> &lt;&lt; channels &lt;&lt; <span style="color: #ff995e;">std</span>::endl;
+    <span style="color: #c099ff;">for</span> <span style="color: #ff995e;">(</span><span style="color: #c099ff;">auto</span> <span style="color: #ff98a4;">i</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; i &lt;= max_i; i += offset<span style="color: #ff995e;">)</span>
+    <span style="color: #ff995e;">{</span>
+        <span style="color: #c099ff;">for</span> <span style="color: #ff98a4;">(</span><span style="color: #c099ff;">auto</span> <span style="color: #ff98a4;">j</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; j &lt;= max_j; j += offset<span style="color: #ff98a4;">)</span>
+        <span style="color: #ff98a4;">{</span>
+            <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">count</span> = <span style="color: #ff995e; font-weight: bold;">0</span>;
+            <span style="color: #ffc777;">double</span> *<span style="color: #ff98a4;">lut</span>;
+            <span style="color: #c099ff;">if</span> <span style="color: #b4f9f8;">(</span>channels &gt; <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #b4f9f8;">)</span>
+            <span style="color: #b4f9f8;">{</span>
+                <span style="color: #ffc777;">int</span> **<span style="color: #ff98a4;">channels_hist</span> = <span style="color: #c099ff;">new</span> <span style="color: #ffc777;">int</span> *<span style="color: #c099ff;">[</span><span style="color: #ff995e;">channels</span><span style="color: #c099ff;">]</span>;
+                <span style="color: #c099ff;">for</span> <span style="color: #c099ff;">(</span><span style="color: #c099ff;">auto</span> <span style="color: #ff98a4;">k</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; k &lt; channels; k++<span style="color: #c099ff;">)</span>
+                <span style="color: #c099ff;">{</span>
+                    count = <span style="color: #ff995e; font-weight: bold;">0</span>;
+                    channels_hist<span style="color: #ff995e;">[</span>k<span style="color: #ff995e;">]</span> = ExtractHistogramRGB<span style="color: #ff995e;">(</span>img, &amp;count, i - offset, i + offset, j - offset, j + offset, k<span style="color: #ff995e;">)</span>;
+                <span style="color: #c099ff;">}</span>
+                lut = BuildLookUpTableRGB<span style="color: #c099ff;">(</span>channels_hist<span style="color: #ff995e;">[</span><span style="color: #ff995e; font-weight: bold;">2</span><span style="color: #ff995e;">]</span>, channels_hist<span style="color: #ff995e;">[</span><span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #ff995e;">]</span>, channels_hist<span style="color: #ff995e;">[</span><span style="color: #ff995e; font-weight: bold;">0</span><span style="color: #ff995e;">]</span>, count<span style="color: #c099ff;">)</span>;
+            <span style="color: #b4f9f8;">}</span>
+            <span style="color: #c099ff;">else</span>
+            <span style="color: #b4f9f8;">{</span>
+                <span style="color: #ffc777;">int</span> *<span style="color: #ff98a4;">hist</span> = ExtractHistogram<span style="color: #c099ff;">(</span>img, &amp;count, i - offset, i + offset, j - offset, j + offset<span style="color: #c099ff;">)</span>;
+                <span style="color: #ffc777;">double</span> *<span style="color: #ff98a4;">prob</span> = CalculateProbability<span style="color: #c099ff;">(</span>hist, count<span style="color: #c099ff;">)</span>;
+                lut = BuildLookUpTable<span style="color: #c099ff;">(</span>prob<span style="color: #c099ff;">)</span>;
+                <span style="color: #c099ff;">delete</span><span style="color: #c099ff;">[]</span> hist;
+                <span style="color: #c099ff;">delete</span><span style="color: #c099ff;">[]</span> prob;
+            <span style="color: #b4f9f8;">}</span>
+            all_luts<span style="color: #b4f9f8;">[</span><span style="color: #ff995e;">std</span>::make_tuple<span style="color: #c099ff;">(</span>i, j<span style="color: #c099ff;">)</span><span style="color: #b4f9f8;">]</span> = lut;
+        <span style="color: #ff98a4;">}</span>
+    <span style="color: #ff995e;">}</span>
+
+    <span style="color: #7a88cf;">// </span><span style="color: #7a88cf;">Interpolating local histogram equalization</span>
+    <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">padding_h</span> = <span style="color: #ff995e;">(</span>height + <span style="color: #ff98a4;">(</span><span style="color: #b4f9f8;">(</span><span style="color: #ffc777;">int</span><span style="color: #b4f9f8;">)</span>floor<span style="color: #b4f9f8;">(</span><span style="color: #c099ff;">(</span><span style="color: #ffc777;">float</span><span style="color: #c099ff;">)</span>window / <span style="color: #ff995e; font-weight: bold;">2.0</span><span style="color: #b4f9f8;">)</span> - height % <span style="color: #b4f9f8;">(</span><span style="color: #ffc777;">int</span><span style="color: #b4f9f8;">)</span>floor<span style="color: #b4f9f8;">(</span><span style="color: #c099ff;">(</span><span style="color: #ffc777;">float</span><span style="color: #c099ff;">)</span>window / <span style="color: #ff995e; font-weight: bold;">2.0</span><span style="color: #b4f9f8;">)</span><span style="color: #ff98a4;">)</span><span style="color: #ff995e;">)</span> - height;
+    <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">padding_w</span> = <span style="color: #ff995e;">(</span>width + <span style="color: #ff98a4;">(</span><span style="color: #b4f9f8;">(</span><span style="color: #ffc777;">int</span><span style="color: #b4f9f8;">)</span>floor<span style="color: #b4f9f8;">(</span><span style="color: #c099ff;">(</span><span style="color: #ffc777;">float</span><span style="color: #c099ff;">)</span>window / <span style="color: #ff995e; font-weight: bold;">2.0</span><span style="color: #b4f9f8;">)</span> - width % <span style="color: #b4f9f8;">(</span><span style="color: #ffc777;">int</span><span style="color: #b4f9f8;">)</span>floor<span style="color: #b4f9f8;">(</span><span style="color: #c099ff;">(</span><span style="color: #ffc777;">float</span><span style="color: #c099ff;">)</span>window / <span style="color: #ff995e; font-weight: bold;">2.0</span><span style="color: #b4f9f8;">)</span><span style="color: #ff98a4;">)</span><span style="color: #ff995e;">)</span> - width;
+
+    <span style="color: #7a88cf;">// </span><span style="color: #7a88cf;">Iterate over the image</span>
+    <span style="color: #c099ff;">for</span> <span style="color: #ff995e;">(</span><span style="color: #c099ff;">auto</span> <span style="color: #ff98a4;">i</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; i &lt; height; i++<span style="color: #ff995e;">)</span>
+    <span style="color: #ff995e;">{</span>
+        <span style="color: #c099ff;">for</span> <span style="color: #ff98a4;">(</span><span style="color: #c099ff;">auto</span> <span style="color: #ff98a4;">j</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; j &lt; width; j++<span style="color: #ff98a4;">)</span>
+        <span style="color: #ff98a4;">{</span>
+            <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">x1</span> = i - <span style="color: #b4f9f8;">(</span>i % <span style="color: #c099ff;">(</span><span style="color: #ffc777;">int</span><span style="color: #c099ff;">)</span>floor<span style="color: #c099ff;">(</span><span style="color: #ff995e;">(</span><span style="color: #ffc777;">float</span><span style="color: #ff995e;">)</span>window / <span style="color: #ff995e; font-weight: bold;">2.0</span><span style="color: #c099ff;">)</span><span style="color: #b4f9f8;">)</span>;
+            <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">y1</span> = j - <span style="color: #b4f9f8;">(</span>j % <span style="color: #c099ff;">(</span><span style="color: #ffc777;">int</span><span style="color: #c099ff;">)</span>floor<span style="color: #c099ff;">(</span><span style="color: #ff995e;">(</span><span style="color: #ffc777;">float</span><span style="color: #ff995e;">)</span>window / <span style="color: #ff995e; font-weight: bold;">2.0</span><span style="color: #c099ff;">)</span><span style="color: #b4f9f8;">)</span>;
+            <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">x2</span> = x1 + <span style="color: #b4f9f8;">(</span><span style="color: #ffc777;">int</span><span style="color: #b4f9f8;">)</span>floor<span style="color: #b4f9f8;">(</span><span style="color: #c099ff;">(</span><span style="color: #ffc777;">float</span><span style="color: #c099ff;">)</span>window / <span style="color: #ff995e; font-weight: bold;">2.0</span><span style="color: #b4f9f8;">)</span>;
+            <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">y2</span> = y1 + <span style="color: #b4f9f8;">(</span><span style="color: #ffc777;">int</span><span style="color: #b4f9f8;">)</span>floor<span style="color: #b4f9f8;">(</span><span style="color: #c099ff;">(</span><span style="color: #ffc777;">float</span><span style="color: #c099ff;">)</span>window / <span style="color: #ff995e; font-weight: bold;">2.0</span><span style="color: #b4f9f8;">)</span>;
+
+            <span style="color: #ffc777;">float</span> <span style="color: #ff98a4;">x1_weight</span> = <span style="color: #b4f9f8;">(</span><span style="color: #ffc777;">float</span><span style="color: #b4f9f8;">)(</span>i - x1<span style="color: #b4f9f8;">)</span> / <span style="color: #b4f9f8;">(</span><span style="color: #ffc777;">float</span><span style="color: #b4f9f8;">)(</span>x2 - x1<span style="color: #b4f9f8;">)</span>;
+            <span style="color: #ffc777;">float</span> <span style="color: #ff98a4;">y1_weight</span> = <span style="color: #b4f9f8;">(</span><span style="color: #ffc777;">float</span><span style="color: #b4f9f8;">)(</span>j - y1<span style="color: #b4f9f8;">)</span> / <span style="color: #b4f9f8;">(</span><span style="color: #ffc777;">float</span><span style="color: #b4f9f8;">)(</span>y2 - y1<span style="color: #b4f9f8;">)</span>;
+            <span style="color: #ffc777;">float</span> <span style="color: #ff98a4;">x2_weight</span> = <span style="color: #b4f9f8;">(</span><span style="color: #ffc777;">float</span><span style="color: #b4f9f8;">)(</span>x2 - i<span style="color: #b4f9f8;">)</span> / <span style="color: #b4f9f8;">(</span><span style="color: #ffc777;">float</span><span style="color: #b4f9f8;">)(</span>x2 - x1<span style="color: #b4f9f8;">)</span>;
+            <span style="color: #ffc777;">float</span> <span style="color: #ff98a4;">y2_weight</span> = <span style="color: #b4f9f8;">(</span><span style="color: #ffc777;">float</span><span style="color: #b4f9f8;">)(</span>y2 - j<span style="color: #b4f9f8;">)</span> / <span style="color: #b4f9f8;">(</span><span style="color: #ffc777;">float</span><span style="color: #b4f9f8;">)(</span>y2 - y1<span style="color: #b4f9f8;">)</span>;
+
+            <span style="color: #ffc777;">double</span> *<span style="color: #ff98a4;">upper_left_lut</span> = all_luts<span style="color: #b4f9f8;">[</span><span style="color: #ff995e;">std</span>::make_tuple<span style="color: #c099ff;">(</span>x1, y1<span style="color: #c099ff;">)</span><span style="color: #b4f9f8;">]</span>;
+            <span style="color: #ffc777;">double</span> *<span style="color: #ff98a4;">upper_right_lut</span> = all_luts<span style="color: #b4f9f8;">[</span><span style="color: #ff995e;">std</span>::make_tuple<span style="color: #c099ff;">(</span>x1, y2<span style="color: #c099ff;">)</span><span style="color: #b4f9f8;">]</span>;
+            <span style="color: #ffc777;">double</span> *<span style="color: #ff98a4;">lower_left_lut</span> = all_luts<span style="color: #b4f9f8;">[</span><span style="color: #ff995e;">std</span>::make_tuple<span style="color: #c099ff;">(</span>x2, y1<span style="color: #c099ff;">)</span><span style="color: #b4f9f8;">]</span>;
+            <span style="color: #ffc777;">double</span> *<span style="color: #ff98a4;">lower_right_lut</span> = all_luts<span style="color: #b4f9f8;">[</span><span style="color: #ff995e;">std</span>::make_tuple<span style="color: #c099ff;">(</span>x2, y2<span style="color: #c099ff;">)</span><span style="color: #b4f9f8;">]</span>;
+
+            <span style="color: #c099ff;">if</span> <span style="color: #b4f9f8;">(</span>channels &gt; <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #b4f9f8;">)</span>
+            <span style="color: #b4f9f8;">{</span>
+                <span style="color: #c099ff;">for</span> <span style="color: #c099ff;">(</span><span style="color: #c099ff;">auto</span> <span style="color: #ff98a4;">k</span> = <span style="color: #ff995e; font-weight: bold;">0</span>; k &lt; channels; k++<span style="color: #c099ff;">)</span>
+                <span style="color: #c099ff;">{</span>
+                    base.at<span style="color: #ff995e;">&lt;</span><span style="color: #ff995e;">cv</span>::Vec3b<span style="color: #ff995e;">&gt;(</span>i, j<span style="color: #ff995e;">)[</span>k<span style="color: #ff995e;">]</span> = <span style="color: #ff995e;">(</span><span style="color: #ffc777;">uchar</span><span style="color: #ff995e;">)</span>ceil<span style="color: #ff995e;">(</span>
+                        upper_left_lut<span style="color: #ff98a4;">[</span>img.at<span style="color: #b4f9f8;">&lt;</span><span style="color: #ff995e;">cv</span>::Vec3b<span style="color: #b4f9f8;">&gt;(</span>i, j<span style="color: #b4f9f8;">)[</span>k<span style="color: #b4f9f8;">]</span><span style="color: #ff98a4;">]</span> * x2_weight * y2_weight +
+                        upper_right_lut<span style="color: #ff98a4;">[</span>img.at<span style="color: #b4f9f8;">&lt;</span><span style="color: #ff995e;">cv</span>::Vec3b<span style="color: #b4f9f8;">&gt;(</span>i, j<span style="color: #b4f9f8;">)[</span>k<span style="color: #b4f9f8;">]</span><span style="color: #ff98a4;">]</span> * x2_weight * y1_weight +
+                        lower_left_lut<span style="color: #ff98a4;">[</span>img.at<span style="color: #b4f9f8;">&lt;</span><span style="color: #ff995e;">cv</span>::Vec3b<span style="color: #b4f9f8;">&gt;(</span>i, j<span style="color: #b4f9f8;">)[</span>k<span style="color: #b4f9f8;">]</span><span style="color: #ff98a4;">]</span> * x1_weight * y2_weight +
+                        lower_right_lut<span style="color: #ff98a4;">[</span>img.at<span style="color: #b4f9f8;">&lt;</span><span style="color: #ff995e;">cv</span>::Vec3b<span style="color: #b4f9f8;">&gt;(</span>i, j<span style="color: #b4f9f8;">)[</span>k<span style="color: #b4f9f8;">]</span><span style="color: #ff98a4;">]</span> * x1_weight * y1_weight<span style="color: #ff995e;">)</span>;
+                <span style="color: #c099ff;">}</span>
+            <span style="color: #b4f9f8;">}</span>
+            <span style="color: #c099ff;">else</span>
+            <span style="color: #b4f9f8;">{</span>
+                base.at<span style="color: #c099ff;">&lt;</span><span style="color: #ffc777;">uchar</span><span style="color: #c099ff;">&gt;(</span>i, j<span style="color: #c099ff;">)</span> = <span style="color: #c099ff;">(</span><span style="color: #ffc777;">uchar</span><span style="color: #c099ff;">)</span>ceil<span style="color: #c099ff;">(</span>upper_left_lut<span style="color: #ff995e;">[</span>img.at<span style="color: #ff98a4;">&lt;</span><span style="color: #ffc777;">uchar</span><span style="color: #ff98a4;">&gt;(</span>i, j<span style="color: #ff98a4;">)</span><span style="color: #ff995e;">]</span> * x2_weight * y2_weight +
+                                                   upper_right_lut<span style="color: #ff995e;">[</span>img.at<span style="color: #ff98a4;">&lt;</span><span style="color: #ffc777;">uchar</span><span style="color: #ff98a4;">&gt;(</span>i, j<span style="color: #ff98a4;">)</span><span style="color: #ff995e;">]</span> * x2_weight * y1_weight +
+                                                   lower_left_lut<span style="color: #ff995e;">[</span>img.at<span style="color: #ff98a4;">&lt;</span><span style="color: #ffc777;">uchar</span><span style="color: #ff98a4;">&gt;(</span>i, j<span style="color: #ff98a4;">)</span><span style="color: #ff995e;">]</span> * x1_weight * y2_weight +
+                                                   lower_right_lut<span style="color: #ff995e;">[</span>img.at<span style="color: #ff98a4;">&lt;</span><span style="color: #ffc777;">uchar</span><span style="color: #ff98a4;">&gt;(</span>i, j<span style="color: #ff98a4;">)</span><span style="color: #ff995e;">]</span> * x1_weight * y1_weight<span style="color: #c099ff;">)</span>;
+            <span style="color: #b4f9f8;">}</span>
+        <span style="color: #ff98a4;">}</span>
+    <span style="color: #ff995e;">}</span>
+
+    <span style="color: #7a88cf;">// </span><span style="color: #7a88cf;">Cleaning all_luts</span>
+    <span style="color: #c099ff;">for</span> <span style="color: #ff995e;">(</span><span style="color: #c099ff;">auto</span> <span style="color: #ff98a4;">it</span> = all_luts.begin<span style="color: #ff98a4;">()</span>; it != all_luts.end<span style="color: #ff98a4;">()</span>; it++<span style="color: #ff995e;">)</span>
+    <span style="color: #ff995e;">{</span>
+        <span style="color: #c099ff;">delete</span><span style="color: #ff98a4;">[]</span> it-&gt;second;
+    <span style="color: #ff995e;">}</span>
+<span style="color: #c099ff;">}</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgcb0dfc3" class="outline-3">
+<h3 id="orgcb0dfc3"><span class="section-number-3">1.3.</span> Parallel implementation</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+All we need to do is to divide the work between threads based on their IDs, as no thread writes to same location in memory there is no need for any kind of lock.
+</p>
+</div>
+<div id="outline-container-orgbb69178" class="outline-4">
+<h4 id="orgbb69178"><span class="section-number-4">1.3.1.</span> Improved algorithm</h4>
+<div class="outline-text-4" id="text-1-3-1">
+<div class="org-src-container">
+<pre class="src src-c++"><span style="color: #ffc777;">void</span> <span style="color: #ff995e;">ParallelLHE</span>::<span style="color: #82aaff;">ApplyLHE</span><span style="color: #c099ff;">(</span><span style="color: #ff995e;">cv</span>::<span style="color: #ffc777;">Mat</span> &amp;<span style="color: #ff98a4;">base</span>, <span style="color: #ff995e;">cv</span>::<span style="color: #ffc777;">Mat</span> <span style="color: #ff98a4;">img</span>, <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">window</span><span style="color: #c099ff;">)</span>
+<span style="color: #c099ff;">{</span>
+<span style="color: #86e1fc; font-weight: bold;">#pragma</span> omp parallel
+    <span style="color: #ff995e;">{</span>
+        <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">n_threads</span> = omp_get_num_threads<span style="color: #ff98a4;">()</span>;
+        <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">thread_id</span> = omp_get_thread_num<span style="color: #ff98a4;">()</span>;
+        <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">i_start</span> = thread_id * <span style="color: #ff98a4;">(</span>base.rows / n_threads<span style="color: #ff98a4;">)</span>;
+        <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">i_end</span> = <span style="color: #ff98a4;">(</span>thread_id + <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #ff98a4;">)</span> * <span style="color: #ff98a4;">(</span>base.rows / n_threads<span style="color: #ff98a4;">)</span>;
+
+        <span style="color: #c099ff;">if</span> <span style="color: #ff98a4;">(</span>thread_id == n_threads - <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #ff98a4;">)</span>
+        <span style="color: #ff98a4;">{</span>
+            i_end = base.rows;
+        <span style="color: #ff98a4;">}</span>
+        ApplyLHEHelper<span style="color: #ff98a4;">(</span>base, img, window, i_start, i_end<span style="color: #ff98a4;">)</span>;
+    <span style="color: #ff995e;">}</span>
+<span style="color: #c099ff;">}</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org2d53a9c" class="outline-4">
+<h4 id="org2d53a9c"><span class="section-number-4">1.3.2.</span> Interpolating LHE</h4>
+<div class="outline-text-4" id="text-1-3-2">
+<div class="org-src-container">
+<pre class="src src-c++"><span style="color: #ffc777;">void</span> <span style="color: #ff995e;">ParallelFastLHE</span>::<span style="color: #82aaff;">ApplyLHEWithInterpolation</span><span style="color: #c099ff;">(</span><span style="color: #ff995e;">cv</span>::<span style="color: #ffc777;">Mat</span> &amp;<span style="color: #ff98a4;">base</span>, <span style="color: #ff995e;">cv</span>::<span style="color: #ffc777;">Mat</span> <span style="color: #ff98a4;">img</span>, <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">window</span><span style="color: #c099ff;">)</span>
+<span style="color: #c099ff;">{</span>
+    <span style="color: #ff995e;">std</span>::<span style="color: #ffc777;">map</span><span style="color: #ff995e;">&lt;</span><span style="color: #ff995e;">std</span>::<span style="color: #ffc777;">tuple</span><span style="color: #ff98a4;">&lt;</span><span style="color: #ffc777;">int</span>, <span style="color: #ffc777;">int</span><span style="color: #ff98a4;">&gt;</span>, <span style="color: #ffc777;">double</span> *<span style="color: #ff995e;">&gt;</span> <span style="color: #ff98a4;">all_luts</span>;
+    <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">offset</span> = <span style="color: #ff995e;">(</span><span style="color: #ffc777;">int</span><span style="color: #ff995e;">)</span>floor<span style="color: #ff995e;">(</span>window / <span style="color: #ff995e; font-weight: bold;">2.0</span><span style="color: #ff995e;">)</span>;
+    <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">height</span> = img.size<span style="color: #ff995e;">()</span>.height;
+    <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">width</span> = img.size<span style="color: #ff995e;">()</span>.width;
+    <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">max_i</span> = height + <span style="color: #ff995e;">(</span>offset - <span style="color: #ff98a4;">(</span>height % offset<span style="color: #ff98a4;">)</span><span style="color: #ff995e;">)</span>;
+    <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">max_j</span> = width + <span style="color: #ff995e;">(</span>offset - <span style="color: #ff98a4;">(</span>width % offset<span style="color: #ff98a4;">)</span><span style="color: #ff995e;">)</span>;
+    <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">channels</span> = img.channels<span style="color: #ff995e;">()</span>;
+<span style="color: #86e1fc; font-weight: bold;">#pragma</span> omp parallel
+    <span style="color: #ff995e;">{</span>
+        <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">n_threads</span> = omp_get_num_threads<span style="color: #ff98a4;">()</span>;
+        <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">thread_id</span> = omp_get_thread_num<span style="color: #ff98a4;">()</span>;
+        <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">i_start</span> = thread_id * <span style="color: #ff98a4;">(</span>max_i / n_threads<span style="color: #ff98a4;">)</span>;
+        <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">i_end</span> = <span style="color: #ff98a4;">(</span>thread_id + <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #ff98a4;">)</span> * <span style="color: #ff98a4;">(</span>max_i / n_threads<span style="color: #ff98a4;">)</span>;
+        <span style="color: #c099ff;">if</span> <span style="color: #ff98a4;">(</span>thread_id == n_threads - <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #ff98a4;">)</span>
+        <span style="color: #ff98a4;">{</span>
+            i_end = max_i + <span style="color: #ff995e; font-weight: bold;">1</span>;
+        <span style="color: #ff98a4;">}</span>
+        BuildAllLuts<span style="color: #ff98a4;">(</span>all_luts, img, offset, i_start, i_end, <span style="color: #ff995e; font-weight: bold;">0</span>, max_j<span style="color: #ff98a4;">)</span>;
+    <span style="color: #ff995e;">}</span>
+
+<span style="color: #86e1fc; font-weight: bold;">#pragma</span> omp parallel
+    <span style="color: #ff995e;">{</span>
+        <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">n_threads</span> = omp_get_num_threads<span style="color: #ff98a4;">()</span>;
+        <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">thread_id</span> = omp_get_thread_num<span style="color: #ff98a4;">()</span>;
+        <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">i_start</span> = thread_id * <span style="color: #ff98a4;">(</span>base.rows / n_threads<span style="color: #ff98a4;">)</span>;
+        <span style="color: #ffc777;">int</span> <span style="color: #ff98a4;">i_end</span> = <span style="color: #ff98a4;">(</span>thread_id + <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #ff98a4;">)</span> * <span style="color: #ff98a4;">(</span>base.rows / n_threads<span style="color: #ff98a4;">)</span>;
+        <span style="color: #c099ff;">if</span> <span style="color: #ff98a4;">(</span>thread_id == n_threads - <span style="color: #ff995e; font-weight: bold;">1</span><span style="color: #ff98a4;">)</span>
+        <span style="color: #ff98a4;">{</span>
+            i_end = base.rows;
+        <span style="color: #ff98a4;">}</span>
+        ApplyLHEWithInterpolHelper<span style="color: #ff98a4;">(</span>base, img, window, i_start, i_end, all_luts<span style="color: #ff98a4;">)</span>;
+    <span style="color: #ff995e;">}</span>
+
+    <span style="color: #c099ff;">for</span> <span style="color: #ff995e;">(</span><span style="color: #c099ff;">auto</span> <span style="color: #ff98a4;">it</span> = all_luts.begin<span style="color: #ff98a4;">()</span>; it != all_luts.end<span style="color: #ff98a4;">()</span>; it++<span style="color: #ff995e;">)</span>
+    <span style="color: #ff995e;">{</span>
+        <span style="color: #c099ff;">delete</span><span style="color: #ff98a4;">[]</span> it-&gt;second;
+    <span style="color: #ff995e;">}</span>
+<span style="color: #c099ff;">}</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org5e08815" class="outline-2">
+<h2 id="org5e08815"><span class="section-number-2">2.</span> Build guide</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-orgaabb76b" class="outline-3">
+<h3 id="orgaabb76b"><span class="section-number-3">2.1.</span> Cloning the project</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+Opencv is one our project&rsquo;s dependencies, for a better experience and avoiding version related problems we have added a specific commit from opencv project to our project as a submodule, that&rsquo;s why we have to perform a recursive pull.
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #ffc777;">git</span> clone --recurse-submodules -j<span style="color: #c099ff;">[</span>your thread count<span style="color: #c099ff;">]</span> https://github.com/toorajtaraz/mpche.git
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org65df857" class="outline-3">
+<h3 id="org65df857"><span class="section-number-3">2.2.</span> Building opencv</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+All we need to do is to create a new directory called build, cd into it, have cmake to generate makefile(s) and finally make the whole project. You may want to enable specific features or backends too.
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #ffc777;">cd</span> mpche/submodules/opencv
+<span style="color: #ffc777;">mkdir</span> build
+<span style="color: #ffc777;">cd</span> build
+cmake <span style="color: #c099ff;">[</span>your flags<span style="color: #c099ff;">]</span> ..
+<span style="color: #ffc777;">make</span> -j<span style="color: #c099ff;">[</span>your thread count<span style="color: #c099ff;">]</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgc62bae4" class="outline-3">
+<h3 id="orgc62bae4"><span class="section-number-3">2.3.</span> Building the project</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+We have to do the same for our project too.
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #ffc777;">cd</span> mpche
+<span style="color: #ffc777;">mkdir</span> build
+cmake ..
+<span style="color: #ffc777;">make</span> -j<span style="color: #c099ff;">[</span>your thread count<span style="color: #c099ff;">]</span>
+./bin/mpche <span style="color: #c099ff;">[</span>flags<span style="color: #c099ff;">]</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org6e74d81" class="outline-3">
+<h3 id="org6e74d81"><span class="section-number-3">2.4.</span> Using the command line interface</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+All you need to do is to pass &ldquo;-h&rdquo; to our executable to get this help text.
+</p>
+<blockquote>
+<p>
+Usage: ./main -s &lt;is_stream&gt; -i &lt;input_path&gt; -o &lt;output_path&gt; [-t &lt;thread_num&gt; -r &lt;ratio&gt; -m &lt;mode&gt; -w &lt;window&gt; -c]
+Thread num: Number of threads to be used
+Ratio: Resize ratio for the image (Only in image mode)
+Mode: 1 for PLHE, 2 for FastPLHE, 3 for SLHE and 4 for FastSLHE
+Color: 1 for color, 0 for grayscale
+Stream: 1 for video, 0 for single image
+Window: Size of the window
+</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Tooraj Taraz</p>
+<p class="date">Created: 2022-04-24 Sun 00:12</p>
+</div>
+</body>
+</html>
